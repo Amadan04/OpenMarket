@@ -1,0 +1,218 @@
+import SwiftUI
+
+struct SellerProfileView: View {
+    let sellerID: Int
+    @StateObject private var viewModel = ProfileViewModel()
+    @State private var selectedTab = 1 // 0=listings, 1=reviews, 2=about
+    @State private var showChat = false
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        ZStack {
+            Color.omBg.ignoresSafeArea()
+            ScrollView {
+                VStack(spacing: 0) {
+                    // Nav
+                    HStack {
+                        Button { dismiss() } label: {
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundStyle(Color.omText)
+                                .frame(width: 40, height: 40)
+                                .background(Color.omBgElevated)
+                                .clipShape(Circle())
+                                .overlay(Circle().stroke(Color.omBorder, lineWidth: 1))
+                        }
+                        Spacer()
+                        Image(systemName: "ellipsis")
+                            .frame(width: 40, height: 40)
+                            .background(Color.omBgElevated)
+                            .clipShape(Circle())
+                            .overlay(Circle().stroke(Color.omBorder, lineWidth: 1))
+                    }
+                    .padding(.horizontal, Spacing.xl)
+                    .padding(.top, Spacing.m)
+
+                    // Profile header
+                    VStack(spacing: Spacing.m) {
+                        ZStack(alignment: .bottomTrailing) {
+                            AvatarView(initial: "S", size: 96, tone: .sage)
+                            Image(systemName: "checkmark.seal.fill")
+                                .font(.system(size: 20))
+                                .foregroundStyle(Color.sage500)
+                                .background(Circle().fill(.white).padding(-2))
+                        }
+
+                        Text("Seller")
+                            .font(.serif(28))
+                            .foregroundStyle(Color.omText)
+                        Text("Joined recently")
+                            .font(.inter(13))
+                            .foregroundStyle(Color.omTextMuted)
+                    }
+                    .padding(.top, Spacing.l)
+
+                    // Stats card
+                    HStack(spacing: 0) {
+                        statItem(value: String(format: "%.1f", viewModel.myReviews?.averageRating ?? 0), label: "Rating", isRating: true)
+                        Divider().frame(height: 40)
+                        statItem(value: "\(viewModel.myListings.count)", label: "Listings")
+                        Divider().frame(height: 40)
+                        statItem(value: "2h", label: "Replies in")
+                    }
+                    .padding(Spacing.m)
+                    .background(Color.omBgElevated)
+                    .clipShape(RoundedRectangle(cornerRadius: Radius.lg))
+                    .overlay(RoundedRectangle(cornerRadius: Radius.lg).stroke(Color.omBorder, lineWidth: 1))
+                    .padding(.horizontal, Spacing.xl)
+                    .padding(.top, Spacing.l)
+
+                    // Action buttons
+                    HStack(spacing: Spacing.s) {
+                        OMButton(label: "Message", variant: .dark, size: .md, icon: "bubble.left.fill") { showChat = true }
+                        OMButton(label: "Follow", variant: .secondary, size: .md) {}
+                    }
+                    .padding(.top, Spacing.m)
+
+                    // Tabs
+                    HStack(spacing: 0) {
+                        ForEach([(0,"Listings"), (1,"Reviews"), (2,"About")], id: \.0) { i, label in
+                            Button {
+                                withAnimation { selectedTab = i }
+                            } label: {
+                                VStack(spacing: Spacing.s) {
+                                    Text(label).font(.inter(14, weight: .semibold))
+                                        .foregroundStyle(selectedTab == i ? Color.omText : Color.omTextMuted)
+                                    Rectangle()
+                                        .fill(selectedTab == i ? Color.omAccent : Color.clear)
+                                        .frame(height: 2)
+                                }
+                                .padding(.top, Spacing.m)
+                            }
+                            .buttonStyle(.plain)
+                            .frame(maxWidth: .infinity)
+                        }
+                    }
+                    .padding(.horizontal, Spacing.xl)
+                    .padding(.top, Spacing.m)
+                    Divider()
+
+                    // Tab content
+                    switch selectedTab {
+                    case 0: listingsTab
+                    case 1: reviewsTab
+                    default: aboutTab
+                    }
+                }
+            }
+        }
+        .navigationBarHidden(true)
+        .task {
+            await viewModel.loadMyListings(userID: sellerID)
+            await viewModel.loadMyReviews(userID: sellerID)
+        }
+        .sheet(isPresented: $showChat) {
+            let vm = ChatViewModel()
+            let other = User(id: sellerID, name: "Seller", email: "", createdAt: Date())
+            ChatView(viewModel: vm, otherUser: other)
+                .task { await vm.openChat(with: sellerID) }
+        }
+    }
+
+    private func statItem(value: String, label: String, isRating: Bool = false) -> some View {
+        VStack(spacing: 2) {
+            HStack(spacing: 3) {
+                if isRating { Image(systemName: "star.fill").font(.system(size: 14)).foregroundStyle(Color.omAccent) }
+                Text(value).font(.inter(18, weight: .bold)).foregroundStyle(Color.omText)
+            }
+            Text(label.uppercased()).font(.omMicro).foregroundStyle(Color.omTextMuted)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private var listingsTab: some View {
+        LazyVStack(spacing: Spacing.m) {
+            ForEach(viewModel.myListings) { product in
+                NavigationLink { ProductDetailView(product: product) } label: {
+                    ProductRowCard(product: product)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, Spacing.xl)
+        .padding(.top, Spacing.l)
+    }
+
+    private var reviewsTab: some View {
+        VStack(spacing: Spacing.l) {
+            if let data = viewModel.myReviews {
+                // Summary
+                HStack(spacing: Spacing.xl) {
+                    VStack(spacing: 6) {
+                        Text(String(format: "%.1f", data.averageRating))
+                            .font(.serif(44)).foregroundStyle(Color.omText)
+                        StarRatingView(rating: data.averageRating, size: 11)
+                        Text("\(data.reviewsCount) reviews").font(.inter(11)).foregroundStyle(Color.omTextMuted)
+                    }
+                    VStack(spacing: 3) {
+                        ForEach([5,4,3,2,1], id: \.self) { star in
+                            let pct = data.reviewsCount > 0 ?
+                                Double(data.reviews.filter { $0.rating == star }.count) / Double(data.reviewsCount) : 0
+                            HStack(spacing: 6) {
+                                Text("\(star)").font(.omMicro).foregroundStyle(Color.omTextMuted).frame(width: 8)
+                                GeometryReader { geo in
+                                    ZStack(alignment: .leading) {
+                                        Capsule().fill(Color.omBgSunken)
+                                        Capsule().fill(star >= 4 ? Color.sage500 : Color.omBorderStrong)
+                                            .frame(width: geo.size.width * pct)
+                                    }
+                                }
+                                .frame(height: 5)
+                            }
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+                .padding(Spacing.l)
+                .background(Color.omBgElevated)
+                .clipShape(RoundedRectangle(cornerRadius: Radius.lg))
+                .overlay(RoundedRectangle(cornerRadius: Radius.lg).stroke(Color.omBorder, lineWidth: 1))
+
+                // Review list
+                ForEach(data.reviews) { review in
+                    reviewItem(review)
+                    Divider()
+                }
+            }
+        }
+        .padding(.horizontal, Spacing.xl)
+        .padding(.top, Spacing.l)
+    }
+
+    private func reviewItem(_ review: Review) -> some View {
+        VStack(alignment: .leading, spacing: Spacing.m) {
+            HStack {
+                AvatarView(initial: "U", size: 36)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("User #\(review.reviewerID)").font(.inter(14, weight: .semibold)).foregroundStyle(Color.omText)
+                    StarRatingView(rating: Double(review.rating), size: 11)
+                }
+                Spacer()
+                Text(review.createdAt, style: .relative).font(.inter(12)).foregroundStyle(Color.omTextMuted)
+            }
+            if !review.comment.isEmpty {
+                Text(review.comment).font(.inter(14)).foregroundStyle(Color.omText).lineSpacing(4)
+            }
+        }
+        .padding(.vertical, Spacing.s)
+    }
+
+    private var aboutTab: some View {
+        VStack(alignment: .leading, spacing: Spacing.m) {
+            Text("Member since recently")
+                .font(.omBody).foregroundStyle(Color.omTextMuted)
+        }
+        .padding(.horizontal, Spacing.xl)
+        .padding(.top, Spacing.l)
+    }
+}
