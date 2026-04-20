@@ -11,9 +11,7 @@ final class ProfileViewModel: ObservableObject {
         isLoading = true
         defer { isLoading = false }
         do {
-            // Will use ?user_id= filter once backend supports it
-            let all = try await ProductService.getAll()
-            myListings = all.filter { $0.userID == userID }
+            myListings = try await ProductService.getByUser(userID: userID)
         } catch {
             errorMessage = error.localizedDescription
         }

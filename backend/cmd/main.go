@@ -25,7 +25,12 @@ func main() {
 	)
 
 	r := gin.Default()
+	r.Static("/uploads", "./uploads")
 	routes.Setup(r, database.DB)
 
-	r.Run(":" + os.Getenv("PORT"))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	r.Run(":" + port)
 }

@@ -26,6 +26,10 @@ struct ProductService {
         return try await APIClient.shared.request(endpoint)
     }
 
+    static func getByUser(userID: Int) async throws -> [Product] {
+        return try await APIClient.shared.request("\(Constants.Endpoints.products)?user_id=\(userID)&limit=100")
+    }
+
     static func create(_ body: CreateProductRequest) async throws -> Product {
         return try await APIClient.shared.request(Constants.Endpoints.products, method: "POST", body: body)
     }

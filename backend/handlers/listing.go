@@ -51,6 +51,12 @@ func GetListings(db *gorm.DB) gin.HandlerFunc {
 			query = query.Where("title LIKE ? OR description LIKE ?", "%"+q+"%", "%"+q+"%")
 		}
 
+		if userID := c.Query("user_id"); userID != "" {
+			if uid, err := strconv.Atoi(userID); err == nil && uid > 0 {
+				query = query.Where("user_id = ?", uid)
+			}
+		}
+
 		limit := 20
 		offset := 0
 		if limitStr := c.Query("limit"); limitStr != "" {

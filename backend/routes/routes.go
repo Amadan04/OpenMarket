@@ -47,6 +47,8 @@ func Setup(r *gin.Engine, db *gorm.DB) {
 		api.DELETE("/favorites/:productId", handlers.DeleteFavorite(db))
 		api.GET("/favorites", handlers.GetFavorites(db))
 
+		api.POST("/upload", handlers.UploadImage())
+
 		api.POST("/messages", handlers.SendMessage(db))
 		api.DELETE("/messages/:id", handlers.DeleteMessage(db))
 		api.GET("/conversations", handlers.GetConversations(db))
