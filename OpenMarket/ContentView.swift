@@ -8,29 +8,36 @@ struct ContentView: View {
             if authViewModel.isAuthenticated {
                 MainTabView()
             } else {
-                LoginView()
+                WelcomeView()
             }
         }
+        .animation(.easeInOut(duration: 0.3), value: authViewModel.isAuthenticated)
     }
 }
 
 struct MainTabView: View {
+    @State private var selectedTab: OMTab = .home
+    @State private var showSell = false
+
     var body: some View {
-        TabView {
-            HomeView()
-                .tabItem { Label("Home", systemImage: "house.fill") }
+        ZStack(alignment: .bottom) {
+            Group {
+                switch selectedTab {
+                case .home:     HomeView()
+                case .map:      MapView()
+                case .sell:     HomeView() // placeholder, handled by sheet
+                case .messages: ConversationsView()
+                case .profile:  ProfileView()
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .safeAreaInset(edge: .bottom) { Color.clear.frame(height: 84) }
 
-            MapView()
-                .tabItem { Label("Map", systemImage: "map.fill") }
-
+            OMTabBar(selected: $selectedTab, onSell: { showSell = true })
+        }
+        .ignoresSafeArea(.keyboard, edges: .bottom)
+        .sheet(isPresented: $showSell) {
             AddProductView()
-                .tabItem { Label("Sell", systemImage: "plus.circle.fill") }
-
-            ConversationsView()
-                .tabItem { Label("Messages", systemImage: "bubble.left.and.bubble.right.fill") }
-
-            ProfileView()
-                .tabItem { Label("Profile", systemImage: "person.fill") }
         }
     }
 }
