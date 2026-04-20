@@ -1,0 +1,143 @@
+package handlers
+
+import (
+	"net/http"
+	"strings"
+
+	"openmarket/models"
+	"openmarket/utils"
+
+	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
+)
+
+type authPayload struct {
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+func Register(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var input authPayload
+		if err := c.ShouldBindJSON(&input); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+			return
+		}
+
+		input.Email = strings.TrimSpace(strings.ToLower(input.Email))
+		input.Name = strings.TrimSpace(input.Name)
+		if input.Name == "" && input.Email != "" {
+			parts := strings.Split(input.Email, "@")
+			if len(parts) > 0 && strings.TrimSpace(parts[0]) != "" {
+				input.Name = parts[0]
+			}
+		}
+		if input.Name == "" || input.Email == "" || len(input.Password) < 8 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "email and password (min 8 chars) are required; name is recommended"})
+			return
+		}
+
+		var existing models.User
+		if err := db.Where("email = ?", input.Email).First(&existing).Error; err == nil {
+			c.JSON(http.StatusConflict, gin.H{"error": "Email already registered"})
+			return
+		} else if err != gorm.ErrRecordNotFound {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to check existing user"})
+			return
+		}
+
+		hash, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create account"})
+			return
+		}
+
+		user := models.User{
+			Name:     input.Name,
+			Email:    input.Email,
+			Password: string(hash),
+		}
+
+		if err := db.Create(&user).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create account"})
+			return
+		}
+
+		token, err := utils.GenerateToken(user.ID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+			return
+		}
+
+		c.JSON(http.StatusCreated, gin.H{
+			"id":    user.ID,
+			"email": user.Email,
+			"token": token,
+			"user": gin.H{
+				"id":         user.ID,
+				"name":       user.Name,
+				"email":      user.Email,
+				"created_at": user.CreatedAt,
+			},
+		})
+	}
+}
+
+func Login(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var input authPayload
+		var user models.User
+
+		if err := c.ShouldBindJSON(&input); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+			return
+		}
+
+		input.Email = strings.TrimSpace(strings.ToLower(input.Email))
+		if err := db.Where("email = ?", input.Email).First(&user).Error; err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+			return
+		}
+
+		if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)); err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+			return
+		}
+
+		token, err := utils.GenerateToken(user.ID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"token": token,
+			"user": gin.H{
+				"id":         user.ID,
+				"name":       user.Name,
+				"email":      user.Email,
+				"created_at": user.CreatedAt,
+			},
+		})
+	}
+}
+
+func Me(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userID := c.GetUint("user_id")
+		var user models.User
+		if err := db.First(&user, userID).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"id":         user.ID,
+			"name":       user.Name,
+			"email":      user.Email,
+			"created_at": user.CreatedAt,
+		})
+	}
+}
