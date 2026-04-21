@@ -87,7 +87,7 @@ struct ProfileView: View {
                         }
                         .buttonStyle(.plain)
                         .padding(.horizontal, Spacing.xl)
-                        .padding(.bottom, Spacing.xl)
+                        .padding(.bottom, 100)
                     }
                 }
             }

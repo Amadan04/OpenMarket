@@ -221,7 +221,7 @@ struct ProductDetailView: View {
                 span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
             )))) {
                 Marker("", coordinate: CLLocationCoordinate2D(latitude: viewModel.product.latitude, longitude: viewModel.product.longitude))
-                    .tint(.omAccent)
+                    .tint(Color.omAccent)
             }
             .frame(height: 140)
             .clipShape(RoundedRectangle(cornerRadius: Radius.lg))

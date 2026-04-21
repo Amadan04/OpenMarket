@@ -173,7 +173,7 @@ private struct MasonryGrid: View {
 
     @ViewBuilder
     private func column(_ items: [Product], tall: Bool) -> some View {
-        LazyVStack(spacing: Spacing.m) {
+        VStack(spacing: Spacing.m) {
             ForEach(Array(items.enumerated()), id: \.element.id) { idx, product in
                 NavigationLink {
                     ProductDetailView(product: product)

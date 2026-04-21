@@ -7,6 +7,7 @@ final class AddProductViewModel: ObservableObject {
     @Published var description = ""
     @Published var price = ""
     @Published var category = "Other"
+    @Published var condition = "Good"
     @Published var location = ""
     @Published var images: [UIImage] = []
     @Published var imageURLs: [String] = []

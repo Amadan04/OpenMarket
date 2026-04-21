@@ -222,7 +222,7 @@ struct AddProductView: View {
                     Text("CONDITION").font(.omMicro).foregroundStyle(Color.omTextSubtle)
                     HStack(spacing: 2) {
                         ForEach(["New", "Like new", "Good", "Fair"], id: \.self) { cond in
-                            let active = viewModel.description.contains(cond) // placeholder logic
+                            let active = viewModel.condition == cond
                             Text(cond)
                                 .font(.inter(13, weight: .semibold))
                                 .foregroundStyle(active ? .white : Color.omText)
@@ -230,6 +230,7 @@ struct AddProductView: View {
                                 .padding(.vertical, Spacing.m)
                                 .background(active ? Color.omAccent : Color.clear)
                                 .clipShape(RoundedRectangle(cornerRadius: Radius.sm))
+                                .onTapGesture { viewModel.condition = cond }
                         }
                     }
                     .padding(4)

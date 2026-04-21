@@ -104,20 +104,22 @@ struct SearchView: View {
     }
 
     private func recentRow(_ term: String) -> some View {
-        HStack(spacing: Spacing.m) {
-            Image(systemName: "magnifyingglass")
-                .foregroundStyle(Color.omTextMuted)
-                .frame(width: 32, height: 32)
-                .background(Color.omBgSunken)
-                .clipShape(Circle())
-            Text(term).font(.omCallout).foregroundStyle(Color.omText)
-            Spacer()
-            Button { } label: {
-                Image(systemName: "xmark").font(.system(size: 13)).foregroundStyle(Color.omTextSubtle)
+        VStack(spacing: 0) {
+            HStack(spacing: Spacing.m) {
+                Image(systemName: "magnifyingglass")
+                    .foregroundStyle(Color.omTextMuted)
+                    .frame(width: 32, height: 32)
+                    .background(Color.omBgSunken)
+                    .clipShape(Circle())
+                Text(term).font(.omCallout).foregroundStyle(Color.omText)
+                Spacer()
+                Button { } label: {
+                    Image(systemName: "xmark").font(.system(size: 13)).foregroundStyle(Color.omTextSubtle)
+                }
             }
+            .padding(.vertical, Spacing.m)
+            Divider()
         }
-        .padding(.vertical, Spacing.m)
-        Divider()
     }
 
     private func searchRow(_ product: Product) -> some View {
