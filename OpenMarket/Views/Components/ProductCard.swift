@@ -8,7 +8,7 @@ struct ProductCardView: View {
     var tall: Bool = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.s) {
+        VStack(alignment: .leading, spacing: 0) {
             ZStack(alignment: .topTrailing) {
                 AsyncImage(url: URL(string: product.images.first ?? "")) { phase in
                     switch phase {
@@ -18,10 +18,10 @@ struct ProductCardView: View {
                             .overlay(Image(systemName: "photo").font(.title2).foregroundStyle(Color.stone300))
                     }
                 }
+                .frame(maxWidth: .infinity)
                 .frame(height: tall ? 220 : 160)
-                .clipShape(RoundedRectangle(cornerRadius: Radius.lg))
+                .clipped()
 
-                // Heart button
                 Button {
                     onFavorite?()
                 } label: {
@@ -35,25 +35,31 @@ struct ProductCardView: View {
                 .padding(Spacing.s)
             }
 
-            Text(product.title)
-                .font(.inter(14, weight: .semibold))
-                .foregroundStyle(Color.omText)
-                .lineLimit(2)
+            VStack(alignment: .leading, spacing: Spacing.xs) {
+                Text(product.title)
+                    .font(.inter(14, weight: .semibold))
+                    .foregroundStyle(Color.omText)
+                    .lineLimit(2)
 
-            Text(product.price.formatted(.currency(code: "USD").precision(.fractionLength(0))))
-                .font(.inter(15, weight: .bold))
-                .foregroundStyle(Color.omAccent)
-                .kerning(-0.2)
+                Text(product.price.formatted(.currency(code: "USD").precision(.fractionLength(0))))
+                    .font(.inter(15, weight: .bold))
+                    .foregroundStyle(Color.omAccent)
+                    .kerning(-0.2)
 
-            HStack(spacing: 3) {
-                Image(systemName: "mappin")
-                    .font(.system(size: 10))
-                    .foregroundStyle(Color.omTextSubtle)
-                Text(product.location.isEmpty ? "No location" : product.location)
-                    .font(.omMicro)
-                    .foregroundStyle(Color.omTextMuted)
+                HStack(spacing: 3) {
+                    Image(systemName: "mappin")
+                        .font(.system(size: 10))
+                        .foregroundStyle(Color.omTextSubtle)
+                    Text(product.location.isEmpty ? "No location" : product.location)
+                        .font(.omMicro)
+                        .foregroundStyle(Color.omTextMuted)
+                }
             }
+            .padding(Spacing.m)
         }
+        .background(Color.omBgElevated)
+        .clipShape(RoundedRectangle(cornerRadius: Radius.lg))
+        .overlay(RoundedRectangle(cornerRadius: Radius.lg).stroke(Color.omBorder, lineWidth: 1))
     }
 }
 

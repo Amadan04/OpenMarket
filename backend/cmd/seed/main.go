@@ -52,7 +52,7 @@ func main() {
 		{"Eames Lounge Chair Replica", "High quality reproduction in walnut and black leather.", "Furniture", "Adliya", 390, 26.2152, 50.5934, []string{"https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=400"}},
 		{"Sony WH-1000XM5 Headphones", "Like new, only used twice. Comes with all accessories.", "Electronics", "Juffair", 210, 26.2061, 50.5989, []string{"https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400"}},
 		{"Linen Blazer - Size L", "Cream colored, worn twice. Perfect for summer.", "Fashion", "Manama", 45, 26.2235, 50.5876, []string{"https://images.unsplash.com/photo-1594938298603-c8148c4b4057?w=400"}},
-		{"MacBook Pro M2 14-inch", "Space gray, 16GB RAM, 512GB SSD. AppleCare until 2025.", 1450, 26.2697, 50.6087, []string{"https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400"}},
+		{"MacBook Pro M2 14-inch", "Space gray, 16GB RAM, 512GB SSD. AppleCare until 2025.", "Electronics", "Seef", 1450, 26.2697, 50.6087, []string{"https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400"}},
 		{"Acoustic Guitar - Yamaha F310", "Great starter guitar, comes with case and extra strings.", "Other", "Isa Town", 95, 26.1699, 50.5271, []string{"https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=400"}},
 		{"Plant Collection - 5 pots", "Mix of succulents and tropical plants. All healthy.", "Other", "Budaiya", 35, 26.2105, 50.4356, []string{"https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=400"}},
 	}

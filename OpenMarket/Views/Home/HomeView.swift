@@ -123,7 +123,7 @@ struct HomeView: View {
                                 .padding(.horizontal, Spacing.xl)
                         }
                     }
-                    .padding(.bottom, Spacing.xl)
+                    .padding(.bottom, 100)
                 }
                 .refreshable { await viewModel.loadProducts() }
             }
@@ -165,14 +165,24 @@ private struct MasonryGrid: View {
     var col2: [Product] { products.enumerated().filter { $0.offset % 2 != 0 }.map(\.element) }
 
     var body: some View {
-        HStack(alignment: .top, spacing: Spacing.m) {
-            column(col1, tall: true)
-            column(col2, tall: false)
+        GeometryReader { geo in
+            let spacing = Spacing.m
+            let colWidth = (geo.size.width - spacing) / 2
+            HStack(alignment: .top, spacing: spacing) {
+                column(col1, width: colWidth, tall: true)
+                column(col2, width: colWidth, tall: false)
+            }
         }
+        .frame(height: estimatedHeight)
+    }
+
+    private var estimatedHeight: CGFloat {
+        let rows = ceil(Double(products.count) / 2.0)
+        return rows * 300 + rows * Spacing.m
     }
 
     @ViewBuilder
-    private func column(_ items: [Product], tall: Bool) -> some View {
+    private func column(_ items: [Product], width: CGFloat, tall: Bool) -> some View {
         VStack(spacing: Spacing.m) {
             ForEach(Array(items.enumerated()), id: \.element.id) { idx, product in
                 NavigationLink {
@@ -181,8 +191,9 @@ private struct MasonryGrid: View {
                     ProductCardView(product: product, tall: (idx % 3 == 0) ? tall : !tall)
                 }
                 .buttonStyle(.plain)
+                .frame(width: width)
             }
         }
-        .frame(maxWidth: .infinity)
+        .frame(width: width)
     }
 }
