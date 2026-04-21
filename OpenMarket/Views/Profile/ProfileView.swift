@@ -55,10 +55,10 @@ struct ProfileView: View {
                         ])
 
                         settingsGroup(header: "Account", rows: [
-                            .init(emoji: "👤", title: "Personal info", badge: nil, destination: nil),
-                            .init(emoji: "📍", title: "Saved locations", badge: nil, destination: nil),
-                            .init(emoji: "🔔", title: "Notifications", badge: nil, destination: nil),
-                            .init(emoji: "🔒", title: "Privacy & security", badge: nil, destination: nil),
+                            .init(emoji: "👤", title: "Personal info", badge: nil, destination: AnyView(PersonalInfoView())),
+                            .init(emoji: "📍", title: "Saved locations", badge: nil, destination: AnyView(SavedLocationsView())),
+                            .init(emoji: "🔔", title: "Notifications", badge: nil, destination: AnyView(NotificationsView())),
+                            .init(emoji: "🔒", title: "Privacy & security", badge: nil, destination: AnyView(PrivacySecurityView())),
                         ])
 
                         settingsGroup(header: "Support", rows: [
