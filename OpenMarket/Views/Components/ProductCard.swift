@@ -5,7 +5,6 @@ struct ProductCardView: View {
     let product: Product
     var isFavorited: Bool = false
     var onFavorite: (() -> Void)? = nil
-    var tall: Bool = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -19,7 +18,7 @@ struct ProductCardView: View {
                     }
                 }
                 .frame(maxWidth: .infinity)
-                .frame(height: tall ? 220 : 160)
+                .frame(height: 160)
                 .clipped()
 
                 Button {

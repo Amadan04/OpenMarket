@@ -157,43 +157,20 @@ struct HomeView: View {
     }
 }
 
-// MARK: - Masonry 2-column grid
+// MARK: - 2-column grid
 private struct MasonryGrid: View {
     let products: [Product]
 
-    var col1: [Product] { products.enumerated().filter { $0.offset % 2 == 0 }.map(\.element) }
-    var col2: [Product] { products.enumerated().filter { $0.offset % 2 != 0 }.map(\.element) }
-
     var body: some View {
-        GeometryReader { geo in
-            let spacing = Spacing.m
-            let colWidth = (geo.size.width - spacing) / 2
-            HStack(alignment: .top, spacing: spacing) {
-                column(col1, width: colWidth, tall: true)
-                column(col2, width: colWidth, tall: false)
-            }
-        }
-        .frame(height: estimatedHeight)
-    }
-
-    private var estimatedHeight: CGFloat {
-        let rows = ceil(Double(products.count) / 2.0)
-        return rows * 300 + rows * Spacing.m
-    }
-
-    @ViewBuilder
-    private func column(_ items: [Product], width: CGFloat, tall: Bool) -> some View {
-        VStack(spacing: Spacing.m) {
-            ForEach(Array(items.enumerated()), id: \.element.id) { idx, product in
+        LazyVGrid(columns: [GridItem(.flexible(), spacing: Spacing.m), GridItem(.flexible(), spacing: Spacing.m)], spacing: Spacing.m) {
+            ForEach(products) { product in
                 NavigationLink {
                     ProductDetailView(product: product)
                 } label: {
-                    ProductCardView(product: product, tall: (idx % 3 == 0) ? tall : !tall)
+                    ProductCardView(product: product)
                 }
                 .buttonStyle(.plain)
-                .frame(width: width)
             }
         }
-        .frame(width: width)
     }
 }
