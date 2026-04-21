@@ -163,7 +163,7 @@ private struct MasonryGrid: View {
 
     private var gridHeight: CGFloat {
         let rows = ceil(Double(products.count) / 2.0)
-        return rows * 220 + (rows - 1) * Spacing.m
+        return rows * 220 + rows * Spacing.m
     }
 
     var body: some View {

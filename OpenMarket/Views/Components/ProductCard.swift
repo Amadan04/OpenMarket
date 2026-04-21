@@ -11,14 +11,19 @@ struct ProductCardView: View {
             ZStack(alignment: .topTrailing) {
                 AsyncImage(url: URL(string: product.images.first ?? "")) { phase in
                     switch phase {
-                    case .success(let img): img.resizable().scaledToFill()
+                    case .success(let img):
+                        img.resizable()
+                            .scaledToFill()
+                            .frame(height: 130)
+                            .clipped()
                     default:
-                        Rectangle().fill(Color.cream200)
+                        Rectangle()
+                            .fill(Color.cream200)
+                            .frame(height: 130)
                             .overlay(Image(systemName: "photo").font(.title2).foregroundStyle(Color.stone300))
                     }
                 }
                 .frame(height: 130)
-                .clipped()
 
                 Button {
                     onFavorite?()
@@ -58,7 +63,7 @@ struct ProductCardView: View {
             .padding(.horizontal, Spacing.s)
             .padding(.vertical, Spacing.s)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, minHeight: 220, maxHeight: 220, alignment: .topLeading)
         .background(Color.omBgElevated)
         .clipShape(RoundedRectangle(cornerRadius: Radius.lg))
         .overlay(RoundedRectangle(cornerRadius: Radius.lg).stroke(Color.omBorder, lineWidth: 1))
