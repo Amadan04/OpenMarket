@@ -161,16 +161,26 @@ struct HomeView: View {
 private struct MasonryGrid: View {
     let products: [Product]
 
+    private var gridHeight: CGFloat {
+        let rows = ceil(Double(products.count) / 2.0)
+        return rows * 220 + (rows - 1) * Spacing.m
+    }
+
     var body: some View {
-        LazyVGrid(columns: [GridItem(.flexible(), spacing: Spacing.m), GridItem(.flexible(), spacing: Spacing.m)], spacing: Spacing.m) {
-            ForEach(products) { product in
-                NavigationLink {
-                    ProductDetailView(product: product)
-                } label: {
-                    ProductCardView(product: product)
+        GeometryReader { geo in
+            let colWidth = (geo.size.width - Spacing.m) / 2
+            LazyVGrid(columns: [GridItem(.fixed(colWidth)), GridItem(.fixed(colWidth))], spacing: Spacing.m) {
+                ForEach(products) { product in
+                    NavigationLink {
+                        ProductDetailView(product: product)
+                    } label: {
+                        ProductCardView(product: product)
+                            .frame(width: colWidth)
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
         }
+        .frame(height: gridHeight)
     }
 }

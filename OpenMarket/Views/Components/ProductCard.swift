@@ -38,6 +38,8 @@ struct ProductCardView: View {
                     .font(.inter(13, weight: .semibold))
                     .foregroundStyle(Color.omText)
                     .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(height: 36, alignment: .topLeading)
 
                 Text(product.price.formatted(.currency(code: "USD").precision(.fractionLength(0))))
                     .font(.inter(14, weight: .bold))
@@ -50,6 +52,7 @@ struct ProductCardView: View {
                     Text(product.location.isEmpty ? "No location" : product.location)
                         .font(.inter(11))
                         .foregroundStyle(Color.omTextMuted)
+                        .lineLimit(1)
                 }
             }
             .padding(.horizontal, Spacing.s)
