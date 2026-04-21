@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 
 enum APIError: Error, LocalizedError {
     case invalidURL
@@ -78,6 +79,40 @@ final class APIClient {
         } catch {
             throw APIError.decodingError
         }
+    }
+
+    // Multipart image upload — returns the hosted URL string
+    func uploadImage(_ image: UIImage) async throws -> String {
+        guard let url = URL(string: Constants.baseURL + "/upload") else { throw APIError.invalidURL }
+        guard let jpeg = image.jpegData(compressionQuality: 0.8) else { throw APIError.noData }
+
+        let boundary = "Boundary-\(UUID().uuidString)"
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        if let token = KeychainHelper.getToken() {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+
+        var body = Data()
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"image\"; filename=\"photo.jpg\"\r\n".data(using: .utf8)!)
+        body.append("Content-Type: image/jpeg\r\n\r\n".data(using: .utf8)!)
+        body.append(jpeg)
+        body.append("\r\n--\(boundary)--\r\n".data(using: .utf8)!)
+        request.httpBody = body
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        if let http = response as? HTTPURLResponse {
+            if http.statusCode == 401 { throw APIError.unauthorized }
+            if http.statusCode >= 400 {
+                let msg = (try? decoder.decode(ErrorResponse.self, from: data))?.error ?? "Upload failed"
+                throw APIError.serverError(msg)
+            }
+        }
+        struct UploadResponse: Decodable { let url: String }
+        guard let result = try? decoder.decode(UploadResponse.self, from: data) else { throw APIError.decodingError }
+        return result.url
     }
 
     // Void response (e.g. DELETE)

@@ -6,6 +6,7 @@ struct AddProductView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
     @Environment(\.dismiss) private var dismiss
     @State private var step = 1
+    @State private var pickerItems: [PhotosPickerItem] = []
     private let totalSteps = 4
 
     var body: some View {
@@ -98,38 +99,64 @@ struct AddProductView: View {
                     .foregroundStyle(Color.omTextMuted)
 
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: Spacing.m) {
-                    // Placeholder images
-                    ForEach(0..<3, id: \.self) { i in
-                        ZStack {
-                            RoundedRectangle(cornerRadius: Radius.md).fill(Color.cream200).frame(height: 100)
-                            if i == 0 {
-                                VStack {
-                                    Image(systemName: "photo.fill").font(.title2).foregroundStyle(Color.stone300)
+                    ForEach(Array(viewModel.images.enumerated()), id: \.offset) { idx, img in
+                        ZStack(alignment: .topLeading) {
+                            Image(uiImage: img)
+                                .resizable().scaledToFill()
+                                .frame(height: 100)
+                                .clipShape(RoundedRectangle(cornerRadius: Radius.md))
+                            if idx == 0 {
+                                Text("COVER")
+                                    .font(.omMicro).foregroundStyle(.white)
+                                    .padding(.horizontal, 8).padding(.vertical, 3)
+                                    .background(Color.omAccent)
+                                    .clipShape(RoundedRectangle(cornerRadius: 6))
+                                    .padding(8)
+                            }
+                            Button {
+                                viewModel.images.remove(at: idx)
+                            } label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .font(.system(size: 20))
+                                    .foregroundStyle(.white)
+                                    .shadow(radius: 2)
+                            }
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                            .padding(6)
+                        }
+                        .frame(height: 100)
+                    }
+
+                    if viewModel.images.count < 10 {
+                        PhotosPicker(
+                            selection: $pickerItems,
+                            maxSelectionCount: 10 - viewModel.images.count,
+                            matching: .images
+                        ) {
+                            RoundedRectangle(cornerRadius: Radius.md)
+                                .strokeBorder(Color.omBorderStrong, style: StrokeStyle(lineWidth: 1.5, dash: [6]))
+                                .frame(height: 100)
+                                .overlay(
+                                    VStack(spacing: 4) {
+                                        Image(systemName: "plus").font(.title3).foregroundStyle(Color.omTextMuted)
+                                        Text("Add photos").font(.inter(11)).foregroundStyle(Color.omTextMuted)
+                                    }
+                                )
+                        }
+                        .onChange(of: pickerItems) { _, items in
+                            Task {
+                                for item in items {
+                                    if let data = try? await item.loadTransferable(type: Data.self),
+                                       let img = UIImage(data: data) {
+                                        viewModel.images.append(img)
+                                    }
                                 }
-                                .overlay(alignment: .topLeading) {
-                                    Text("COVER")
-                                        .font(.omMicro)
-                                        .foregroundStyle(.white)
-                                        .padding(.horizontal, 8).padding(.vertical, 3)
-                                        .background(Color.omAccent)
-                                        .clipShape(RoundedRectangle(cornerRadius: 6))
-                                        .padding(8)
-                                }
-                            } else {
-                                Image(systemName: "photo").font(.title3).foregroundStyle(Color.stone300)
+                                pickerItems = []
                             }
                         }
                     }
-                    // Add button
-                    ForEach(0..<3, id: \.self) { _ in
-                        RoundedRectangle(cornerRadius: Radius.md)
-                            .strokeBorder(Color.omBorderStrong, style: StrokeStyle(lineWidth: 1.5, dash: [6]))
-                            .frame(height: 100)
-                            .overlay(Image(systemName: "plus").font(.title3).foregroundStyle(Color.omTextMuted))
-                    }
                 }
 
-                // Tip card
                 HStack(spacing: Spacing.m) {
                     Text("💡").font(.title3)
                         .frame(width: 32, height: 32)

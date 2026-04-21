@@ -21,6 +21,13 @@ final class AddProductViewModel: ObservableObject {
         !title.isEmpty && !price.isEmpty && Double(price) != nil
     }
 
+    func uploadImages() async throws {
+        for image in images {
+            let url = try await APIClient.shared.uploadImage(image)
+            imageURLs.append(url)
+        }
+    }
+
     func submit() async {
         guard isValid else {
             errorMessage = "Please fill in all required fields."
@@ -30,6 +37,9 @@ final class AddProductViewModel: ObservableObject {
         errorMessage = nil
         defer { isLoading = false }
         do {
+            if !images.isEmpty && imageURLs.count < images.count {
+                try await uploadImages()
+            }
             let body = CreateProductRequest(
                 title: title,
                 description: description,
