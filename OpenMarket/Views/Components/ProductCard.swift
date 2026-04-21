@@ -32,13 +32,13 @@ struct ProductCardView: View {
                 }
                 .padding(Spacing.s)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(product.title)
                     .font(.inter(13, weight: .semibold))
                     .foregroundStyle(Color.omText)
                     .lineLimit(2)
-                    .fixedSize(horizontal: false, vertical: true)
                     .frame(height: 36, alignment: .topLeading)
 
                 Text(product.price.formatted(.currency(code: "USD").precision(.fractionLength(0))))
