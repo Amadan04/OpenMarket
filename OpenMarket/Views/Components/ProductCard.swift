@@ -17,8 +17,7 @@ struct ProductCardView: View {
                             .overlay(Image(systemName: "photo").font(.title2).foregroundStyle(Color.stone300))
                     }
                 }
-                .frame(maxWidth: .infinity)
-                .frame(height: 160)
+                .frame(height: 130)
                 .clipped()
 
                 Button {
@@ -34,28 +33,29 @@ struct ProductCardView: View {
                 .padding(Spacing.s)
             }
 
-            VStack(alignment: .leading, spacing: Spacing.xs) {
+            VStack(alignment: .leading, spacing: 3) {
                 Text(product.title)
-                    .font(.inter(14, weight: .semibold))
+                    .font(.inter(13, weight: .semibold))
                     .foregroundStyle(Color.omText)
                     .lineLimit(2)
 
                 Text(product.price.formatted(.currency(code: "USD").precision(.fractionLength(0))))
-                    .font(.inter(15, weight: .bold))
+                    .font(.inter(14, weight: .bold))
                     .foregroundStyle(Color.omAccent)
-                    .kerning(-0.2)
 
                 HStack(spacing: 3) {
                     Image(systemName: "mappin")
-                        .font(.system(size: 10))
+                        .font(.system(size: 9))
                         .foregroundStyle(Color.omTextSubtle)
                     Text(product.location.isEmpty ? "No location" : product.location)
-                        .font(.omMicro)
+                        .font(.inter(11))
                         .foregroundStyle(Color.omTextMuted)
                 }
             }
-            .padding(Spacing.m)
+            .padding(.horizontal, Spacing.s)
+            .padding(.vertical, Spacing.s)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.omBgElevated)
         .clipShape(RoundedRectangle(cornerRadius: Radius.lg))
         .overlay(RoundedRectangle(cornerRadius: Radius.lg).stroke(Color.omBorder, lineWidth: 1))
