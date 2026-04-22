@@ -16,6 +16,15 @@ struct MapView: View {
 
     private let quickFilters = ["All", "Under $100", "Tech", "Furniture"]
 
+    private func categoryEmoji(_ category: String) -> String {
+        let map: [String: String] = [
+            "Vehicles": "🚗", "Property": "🏠", "Mobile": "📱",
+            "Electronics": "📷", "Furniture": "🪑", "Fashion": "👕",
+            "Sports": "🚲", "Books": "📚", "Other": "📦"
+        ]
+        return map[category] ?? "🏷️"
+    }
+
     var body: some View {
         ZStack(alignment: .bottom) {
             // Map
@@ -28,17 +37,31 @@ struct MapView: View {
                                     selectedProduct = product
                                 }
                             } label: {
-                                Text(product.price.formatted(.currency(code: "USD").precision(.fractionLength(0))))
-                                    .font(.inter(13, weight: .bold))
-                                    .foregroundStyle(selectedProduct?.id == product.id ? .white : Color.omText)
-                                    .padding(.horizontal, Spacing.m)
-                                    .padding(.vertical, 6)
-                                    .background(selectedProduct?.id == product.id ? Color.omAccent : .white)
+                                let isSelected = selectedProduct?.id == product.id
+                                VStack(spacing: 2) {
+                                    HStack(spacing: 4) {
+                                        Text(categoryEmoji(product.category))
+                                            .font(.system(size: 12))
+                                        Text(product.price.formatted(.currency(code: "USD").precision(.fractionLength(0))))
+                                            .font(.inter(12, weight: .bold))
+                                            .foregroundStyle(isSelected ? .white : Color.omText)
+                                    }
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 5)
+                                    .background(isSelected ? Color.omAccent : .white)
                                     .clipShape(Capsule())
-                                    .shadow(color: selectedProduct?.id == product.id ?
-                                            Color.omAccent.opacity(0.4) : Color.stone700.opacity(0.12),
+                                    .shadow(color: isSelected ? Color.omAccent.opacity(0.4) : Color.stone700.opacity(0.15),
                                             radius: 6, y: 3)
+
+                                    // Pin tail
+                                    Triangle()
+                                        .fill(isSelected ? Color.omAccent : .white)
+                                        .frame(width: 10, height: 5)
+                                }
+                                .scaleEffect(isSelected ? 1.1 : 1.0)
+                                .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isSelected)
                             }
+                            .buttonStyle(.plain)
                         }
                     }
                 }
@@ -170,5 +193,16 @@ struct MapView: View {
         .padding(.horizontal, Spacing.l)
         .padding(.bottom, 100) // above tab bar
         .shadow(color: Color.stone700.opacity(0.12), radius: 16, y: -4)
+    }
+}
+
+private struct Triangle: Shape {
+    func path(in rect: CGRect) -> Path {
+        Path { p in
+            p.move(to: CGPoint(x: rect.midX, y: rect.maxY))
+            p.addLine(to: CGPoint(x: rect.minX, y: rect.minY))
+            p.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
+            p.closeSubpath()
+        }
     }
 }

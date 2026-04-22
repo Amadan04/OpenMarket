@@ -49,6 +49,7 @@ struct FavoritesView: View {
                         ScrollView {
                             LazyVStack(spacing: Spacing.m) {
                                 ForEach(viewModel.favorites) { fav in
+
                                     NavigationLink { ProductDetailView(product: fav.product) } label: {
                                         HStack(spacing: Spacing.m) {
                                             AsyncImage(url: URL(string: fav.product.images.first ?? "")) { phase in
@@ -95,6 +96,7 @@ struct FavoritesView: View {
                             .padding(.horizontal, Spacing.xl)
                             .padding(.bottom, Spacing.xl)
                         }
+                        .refreshable { await viewModel.load() }
                     }
                 }
             }

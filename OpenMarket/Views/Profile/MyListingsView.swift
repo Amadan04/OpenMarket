@@ -139,6 +139,15 @@ struct MyListingsView: View {
         .padding(.top, 60)
     }
 
+    private func delete(_ product: Product) async {
+        do {
+            try await ProductService.delete(id: product.id)
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                viewModel.myListings.removeAll { $0.id == product.id }
+            }
+        } catch {}
+    }
+
     private func listingRow(_ product: Product) -> some View {
         HStack(spacing: Spacing.m) {
             ZStack(alignment: .bottomLeading) {
@@ -200,6 +209,13 @@ struct MyListingsView: View {
         .clipShape(RoundedRectangle(cornerRadius: Radius.md))
         .overlay(RoundedRectangle(cornerRadius: Radius.md).stroke(Color.omBorder, lineWidth: 1))
         .opacity(product.isSold ? 0.6 : 1.0)
+        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+            Button(role: .destructive) {
+                Task { await delete(product) }
+            } label: {
+                Label("Delete", systemImage: "trash")
+            }
+        }
     }
 
     private func markSold(_ product: Product) async {
