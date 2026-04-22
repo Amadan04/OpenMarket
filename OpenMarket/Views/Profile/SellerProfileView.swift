@@ -6,6 +6,7 @@ struct SellerProfileView: View {
     @State private var selectedTab = 1 // 0=listings, 1=reviews, 2=about
     @State private var showChat = false
     @Environment(\.dismiss) private var dismiss
+    @State private var isFollowing = false
 
     var body: some View {
         ZStack {
@@ -70,7 +71,15 @@ struct SellerProfileView: View {
                     // Action buttons
                     HStack(spacing: Spacing.s) {
                         OMButton(label: "Message", variant: .dark, size: .md, icon: "bubble.left.fill") { showChat = true }
-                        OMButton(label: "Follow", variant: .secondary, size: .md) {}
+                        OMButton(
+                            label: isFollowing ? "Following ✓" : "Follow",
+                            variant: isFollowing ? .primary : .secondary,
+                            size: .md
+                        ) {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                isFollowing.toggle()
+                            }
+                        }
                     }
                     .padding(.top, Spacing.m)
 
