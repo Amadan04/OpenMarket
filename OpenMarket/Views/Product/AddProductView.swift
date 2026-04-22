@@ -7,6 +7,7 @@ struct AddProductView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var step = 1
     @State private var pickerItems: [PhotosPickerItem] = []
+    @State private var showLocationPicker = false
     private let totalSteps = 4
 
     var body: some View {
@@ -275,6 +276,28 @@ struct AddProductView: View {
                 .overlay(RoundedRectangle(cornerRadius: Radius.lg).stroke(Color.omBorder, lineWidth: 1))
 
                 OMField(label: "Location", text: $viewModel.location, placeholder: "City, neighbourhood", leadingIcon: "mappin.circle.fill")
+
+                Button {
+                    showLocationPicker = true
+                } label: {
+                    HStack(spacing: Spacing.s) {
+                        Image(systemName: "map.fill").font(.system(size: 14))
+                        Text("Pick on map")
+                            .font(.inter(14, weight: .semibold))
+                    }
+                    .foregroundStyle(Color.omAccent)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 44)
+                    .background(Color.omAccentSoft)
+                    .clipShape(RoundedRectangle(cornerRadius: Radius.md))
+                }
+                .sheet(isPresented: $showLocationPicker) {
+                    LocationPickerView { coordinate, name in
+                        viewModel.location = name
+                        viewModel.latitude = coordinate.latitude
+                        viewModel.longitude = coordinate.longitude
+                    }
+                }
             }
             .padding(.horizontal, Spacing.xl)
             .padding(.bottom, Spacing.xl)
