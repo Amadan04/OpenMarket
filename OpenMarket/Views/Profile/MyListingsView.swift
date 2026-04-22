@@ -93,9 +93,13 @@ struct MyListingsView: View {
                 Divider()
 
                 if viewModel.isLoading {
-                    Spacer()
-                    ProgressView()
-                    Spacer()
+                    ScrollView {
+                        LazyVStack(spacing: Spacing.m) {
+                            ForEach(0..<5, id: \.self) { _ in SkeletonRowView() }
+                        }
+                        .padding(.horizontal, Spacing.xl)
+                        .padding(.top, Spacing.s)
+                    }
                 } else {
                     ScrollView {
                         LazyVStack(spacing: Spacing.m) {

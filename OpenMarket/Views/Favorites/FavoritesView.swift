@@ -36,9 +36,13 @@ struct FavoritesView: View {
                     .padding(.bottom, Spacing.m)
 
                     if viewModel.isLoading {
-                        Spacer()
-                        ProgressView()
-                        Spacer()
+                        ScrollView {
+                            LazyVStack(spacing: Spacing.m) {
+                                ForEach(0..<5, id: \.self) { _ in SkeletonRowView() }
+                            }
+                            .padding(.horizontal, Spacing.xl)
+                            .padding(.top, Spacing.s)
+                        }
                     } else if viewModel.favorites.isEmpty {
                         emptyState
                     } else {

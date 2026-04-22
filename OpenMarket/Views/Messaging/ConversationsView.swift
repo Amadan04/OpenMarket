@@ -50,9 +50,14 @@ struct ConversationsView: View {
                     Divider()
 
                     if viewModel.isLoading {
-                        Spacer()
-                        ProgressView()
-                        Spacer()
+                        ScrollView {
+                            VStack(spacing: 0) {
+                                ForEach(0..<6, id: \.self) { _ in
+                                    SkeletonConversationRow()
+                                    Divider().padding(.leading, Spacing.xl + 52 + Spacing.m)
+                                }
+                            }
+                        }
                     } else if viewModel.conversations.isEmpty {
                         emptyState
                     } else {

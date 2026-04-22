@@ -115,7 +115,8 @@ struct HomeView: View {
 
                         // Masonry 2-col grid
                         if viewModel.isLoading {
-                            ProgressView().padding(.top, Spacing.x4)
+                            SkeletonGrid(count: 6)
+                                .padding(.horizontal, Spacing.xl)
                         } else if viewModel.products.isEmpty {
                             emptyState
                         } else {
