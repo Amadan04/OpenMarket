@@ -20,7 +20,11 @@ struct ChatView: View {
             }
         }
         .navigationBarHidden(true)
-        .onDisappear { viewModel.closeChat() }
+        .onAppear { AppState.shared.showTabBar = false }
+        .onDisappear {
+            AppState.shared.showTabBar = true
+            viewModel.closeChat()
+        }
     }
 
     // MARK: - Nav bar

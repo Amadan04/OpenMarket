@@ -16,6 +16,7 @@ struct ContentView: View {
 }
 
 struct MainTabView: View {
+    @EnvironmentObject var appState: AppState
     @State private var selectedTab: OMTab = .home
     @State private var showSell = false
 
@@ -33,10 +34,14 @@ struct MainTabView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .transition(.opacity.combined(with: .scale(scale: 0.98)))
             .animation(.easeInOut(duration: 0.2), value: selectedTab)
-            .safeAreaInset(edge: .bottom) { Color.clear.frame(height: 84) }
+            .safeAreaInset(edge: .bottom) { Color.clear.frame(height: appState.showTabBar ? 84 : 0) }
 
-            OMTabBar(selected: $selectedTab, onSell: { showSell = true })
+            if appState.showTabBar {
+                OMTabBar(selected: $selectedTab, onSell: { showSell = true })
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
         }
+        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: appState.showTabBar)
         .ignoresSafeArea(.keyboard, edges: .bottom)
         .sheet(isPresented: $showSell) {
             AddProductView()

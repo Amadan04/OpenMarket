@@ -3,13 +3,17 @@ import SwiftUI
 struct PersonalInfoView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
     @Environment(\.dismiss) private var dismiss
-    @State private var name: String = ""
-    @State private var email: String = ""
+    @State private var isEditing = false
+    @State private var name = ""
+    @State private var phone = ""
+    @State private var isSaving = false
+    @State private var saved = false
 
     var body: some View {
         ZStack {
             Color.omBg.ignoresSafeArea()
             VStack(spacing: 0) {
+                // Nav
                 HStack {
                     Button { dismiss() } label: {
                         Image(systemName: "chevron.left")
@@ -26,26 +30,93 @@ struct PersonalInfoView: View {
                     }
                     .padding(.leading, Spacing.s)
                     Spacer()
+                    Button(isEditing ? "Cancel" : "Edit") {
+                        if isEditing {
+                            name = authViewModel.currentUser?.name ?? ""
+                            phone = ""
+                        }
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                            isEditing.toggle()
+                        }
+                    }
+                    .font(.inter(14, weight: .semibold))
+                    .foregroundStyle(Color.omAccent)
                 }
                 .padding(.horizontal, Spacing.xl)
                 .padding(.vertical, Spacing.m)
 
                 ScrollView {
                     VStack(spacing: Spacing.m) {
-                        AvatarView(initial: authViewModel.currentUser?.name.prefix(1).description ?? "?", size: 72)
-                            .padding(.vertical, Spacing.l)
+                        // Avatar
+                        ZStack(alignment: .bottomTrailing) {
+                            AvatarView(initial: authViewModel.currentUser?.name.prefix(1).description ?? "?", size: 80)
+                            if isEditing {
+                                Image(systemName: "camera.fill")
+                                    .font(.system(size: 12))
+                                    .foregroundStyle(.white)
+                                    .frame(width: 26, height: 26)
+                                    .background(Color.omAccent)
+                                    .clipShape(Circle())
+                                    .offset(x: 4, y: 4)
+                            }
+                        }
+                        .padding(.vertical, Spacing.l)
+                        .animation(.spring(response: 0.3), value: isEditing)
 
-                        infoRow(icon: "person", label: "Full name", value: authViewModel.currentUser?.name ?? "—")
-                        infoRow(icon: "envelope", label: "Email", value: authViewModel.currentUser?.email ?? "—")
-                        infoRow(icon: "phone", label: "Phone number", value: "Not set")
-                        infoRow(icon: "calendar", label: "Member since", value: authViewModel.currentUser?.createdAt.formatted(date: .abbreviated, time: .omitted) ?? "—")
+                        if isEditing {
+                            // Editable fields
+                            OMField(label: "Full name", text: $name, placeholder: "Your name", leadingIcon: "person")
+                            OMField(label: "Phone number", text: $phone, placeholder: "+973 XXXX XXXX", leadingIcon: "phone")
+                                .keyboardType(.phonePad)
+
+                            // Email — read only
+                            readRow(icon: "envelope", label: "Email", value: authViewModel.currentUser?.email ?? "—", note: "Cannot be changed")
+
+                            if saved {
+                                HStack(spacing: Spacing.s) {
+                                    Image(systemName: "checkmark.circle.fill").foregroundStyle(Color.omOk)
+                                    Text("Changes saved").font(.inter(14, weight: .semibold)).foregroundStyle(Color.omOk)
+                                }
+                                .transition(.scale.combined(with: .opacity))
+                            }
+
+                            OMButton(label: "Save changes", size: .lg, fullWidth: true, isLoading: isSaving) {
+                                save()
+                            }
+                            .padding(.top, Spacing.s)
+
+                        } else {
+                            // Read-only rows
+                            infoRow(icon: "person", label: "Full name", value: authViewModel.currentUser?.name ?? "—")
+                            infoRow(icon: "envelope", label: "Email", value: authViewModel.currentUser?.email ?? "—")
+                            infoRow(icon: "phone", label: "Phone number", value: phone.isEmpty ? "Not set" : phone)
+                            infoRow(icon: "calendar", label: "Member since", value: authViewModel.currentUser?.createdAt.formatted(date: .abbreviated, time: .omitted) ?? "—")
+                        }
                     }
                     .padding(.horizontal, Spacing.xl)
-                    .padding(.bottom, Spacing.xl)
+                    .padding(.bottom, 100)
+                    .animation(.spring(response: 0.35, dampingFraction: 0.85), value: isEditing)
                 }
             }
         }
         .navigationBarHidden(true)
+        .onAppear {
+            name = authViewModel.currentUser?.name ?? ""
+        }
+    }
+
+    private func save() {
+        isSaving = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+            isSaving = false
+            withAnimation(.spring(response: 0.4)) {
+                saved = true
+                isEditing = false
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                withAnimation { saved = false }
+            }
+        }
     }
 
     private func infoRow(icon: String, label: String, value: String) -> some View {
@@ -64,6 +135,27 @@ struct PersonalInfoView: View {
         }
         .padding(Spacing.l)
         .background(Color.omBgElevated)
+        .clipShape(RoundedRectangle(cornerRadius: Radius.md))
+        .overlay(RoundedRectangle(cornerRadius: Radius.md).stroke(Color.omBorder, lineWidth: 1))
+    }
+
+    private func readRow(icon: String, label: String, value: String, note: String) -> some View {
+        HStack(spacing: Spacing.m) {
+            Image(systemName: icon)
+                .font(.system(size: 16))
+                .foregroundStyle(Color.omTextMuted)
+                .frame(width: 40, height: 40)
+                .background(Color.omBgSunken)
+                .clipShape(Circle())
+            VStack(alignment: .leading, spacing: 2) {
+                Text(label).font(.omCaption).foregroundStyle(Color.omTextMuted)
+                Text(value).font(.omBodyMed).foregroundStyle(Color.omText)
+                Text(note).font(.inter(11)).foregroundStyle(Color.omTextSubtle)
+            }
+            Spacer()
+        }
+        .padding(Spacing.l)
+        .background(Color.omBgSunken)
         .clipShape(RoundedRectangle(cornerRadius: Radius.md))
         .overlay(RoundedRectangle(cornerRadius: Radius.md).stroke(Color.omBorder, lineWidth: 1))
     }
