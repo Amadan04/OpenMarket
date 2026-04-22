@@ -47,10 +47,11 @@ struct MyListingsView: View {
 
                 // Stats banner
                 HStack(spacing: 0) {
+                    let totalViews = viewModel.myListings.reduce(0) { $0 + $1.viewCount }
                     let stats: [(String, String)] = [
                         ("\(activeListings.count)", "Active"),
                         ("\(soldListings.count)", "Sold"),
-                        ("—", "Views"),
+                        ("\(totalViews)", "Views"),
                         ("—", "Messages")
                     ]
                     ForEach(Array(stats.enumerated()), id: \.offset) { idx, s in
@@ -215,6 +216,10 @@ struct MyListingsView: View {
             } label: {
                 Label("Delete", systemImage: "trash")
             }
+            NavigationLink { EditListingView(product: product) } label: {
+                Label("Edit", systemImage: "pencil")
+            }
+            .tint(Color.omAccent)
         }
     }
 

@@ -52,6 +52,8 @@ type Listing struct {
 	Images      StringSlice `gorm:"type:text;not null;default:'[]'" json:"images"`
 	Latitude    float64     `json:"latitude"`
 	Longitude   float64     `json:"longitude"`
+	Condition   string      `gorm:"default:'Good'" json:"condition"`
+	ViewCount   int         `gorm:"default:0" json:"view_count"`
 	IsSold      bool        `gorm:"default:false" json:"is_sold"`
 	UserID      uint        `gorm:"index;not null" json:"user_id"`
 	CreatedAt   time.Time   `json:"created_at"`

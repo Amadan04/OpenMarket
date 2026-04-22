@@ -117,33 +117,81 @@ struct ChatView: View {
     @ViewBuilder
     private func messageBubble(_ message: Message) -> some View {
         let isMe = message.senderID == KeychainHelper.getUserID()
+        let isOffer = message.content.hasPrefix("💰 Offer:")
+
         HStack(alignment: .bottom, spacing: Spacing.s) {
             if isMe { Spacer(minLength: 60) }
             if !isMe { AvatarView(initial: otherUser.name.prefix(1).description, size: 28, tone: .sage) }
 
-            Text(message.content)
-                .font(.inter(14.5))
-                .foregroundStyle(isMe ? .white : Color.omText)
-                .padding(.horizontal, Spacing.m)
-                .padding(.vertical, Spacing.m)
-                .background(isMe ? Color.omAccent : Color.omBgElevated)
-                .clipShape(
-                    .rect(
-                        topLeadingRadius: 18,
-                        bottomLeadingRadius: isMe ? 18 : 4,
-                        bottomTrailingRadius: isMe ? 4 : 18,
-                        topTrailingRadius: 18
+            if isOffer && !isMe {
+                offerBubble(message)
+            } else {
+                Text(message.content)
+                    .font(.inter(14.5))
+                    .foregroundStyle(isMe ? .white : Color.omText)
+                    .padding(.horizontal, Spacing.m)
+                    .padding(.vertical, Spacing.m)
+                    .background(isMe ? Color.omAccent : Color.omBgElevated)
+                    .clipShape(
+                        .rect(
+                            topLeadingRadius: 18,
+                            bottomLeadingRadius: isMe ? 18 : 4,
+                            bottomTrailingRadius: isMe ? 4 : 18,
+                            topTrailingRadius: 18
+                        )
                     )
-                )
-                .overlay(
-                    isMe ? nil :
-                    RoundedRectangle(cornerRadius: 18).stroke(Color.omBorder, lineWidth: 1)
-                )
-                .frame(maxWidth: 280, alignment: isMe ? .trailing : .leading)
+                    .overlay(
+                        isMe ? nil :
+                        RoundedRectangle(cornerRadius: 18).stroke(Color.omBorder, lineWidth: 1)
+                    )
+                    .frame(maxWidth: 280, alignment: isMe ? .trailing : .leading)
+            }
 
             if isMe { AvatarView(initial: "M", size: 28) }
             if !isMe { Spacer(minLength: 60) }
         }
+    }
+
+    @ViewBuilder
+    private func offerBubble(_ message: Message) -> some View {
+        VStack(alignment: .leading, spacing: Spacing.s) {
+            Text(message.content)
+                .font(.inter(14))
+                .foregroundStyle(Color.omText)
+                .frame(maxWidth: 240, alignment: .leading)
+
+            HStack(spacing: Spacing.s) {
+                Button {
+                    Task { await viewModel.sendMessage(content: "✅ Offer accepted!") }
+                } label: {
+                    Text("Accept")
+                        .font(.inter(13, weight: .bold))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .background(Color.omOk)
+                        .clipShape(Capsule())
+                }
+
+                Button {
+                    Task { await viewModel.sendMessage(content: "❌ Offer declined.") }
+                } label: {
+                    Text("Decline")
+                        .font(.inter(13, weight: .bold))
+                        .foregroundStyle(Color.omError)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .background(Color.omError.opacity(0.1))
+                        .clipShape(Capsule())
+                        .overlay(Capsule().stroke(Color.omError.opacity(0.3), lineWidth: 1))
+                }
+            }
+        }
+        .padding(Spacing.m)
+        .background(Color.omBgElevated)
+        .clipShape(RoundedRectangle(cornerRadius: 18))
+        .overlay(RoundedRectangle(cornerRadius: 18).stroke(Color.omBorder, lineWidth: 1))
+        .frame(maxWidth: 260)
     }
 
     // MARK: - Composer

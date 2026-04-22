@@ -10,12 +10,15 @@ struct Product: Codable, Identifiable {
     var images: [String]
     var latitude: Double
     var longitude: Double
+    var condition: String
+    var viewCount: Int
     var isSold: Bool
     let userID: Int
     let createdAt: Date
 
     enum CodingKeys: String, CodingKey {
         case id, title, description, price, category, location, images, latitude, longitude
+        case viewCount = "view_count"
         case isSold    = "is_sold"
         case userID    = "user_id"
         case createdAt = "created_at"
@@ -27,6 +30,7 @@ struct CreateProductRequest: Encodable {
     let description: String
     let price: Double
     let category: String
+    let condition: String
     let location: String
     let images: [String]
     let latitude: Double

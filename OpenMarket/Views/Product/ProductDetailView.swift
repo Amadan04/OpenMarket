@@ -6,6 +6,7 @@ struct ProductDetailView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
     @Environment(\.dismiss) private var dismiss
     @State private var showChat = false
+    @State private var showOffer = false
     @State private var showSellerProfile = false
     @State private var imageIndex = 0
 
@@ -99,6 +100,9 @@ struct ProductDetailView: View {
                 ChatView(viewModel: vm, otherUser: other)
                     .task { await vm.openChat(with: viewModel.product.userID) }
             }
+        }
+        .sheet(isPresented: $showOffer) {
+            MakeOfferView(product: viewModel.product)
         }
         .navigationDestination(isPresented: $showSellerProfile) {
             SellerProfileView(sellerID: viewModel.product.userID)
@@ -273,7 +277,11 @@ struct ProductDetailView: View {
                     .overlay(Circle().stroke(Color.omBorderStrong, lineWidth: 1))
             }
 
-            OMButton(label: "Message Seller", size: .lg, fullWidth: true, icon: "bubble.left.fill") {
+            OMButton(label: "Make Offer", variant: .secondary, size: .lg, icon: "tag.fill") {
+                showOffer = true
+            }
+
+            OMButton(label: "Message", size: .lg, icon: "bubble.left.fill") {
                 showChat = true
             }
         }

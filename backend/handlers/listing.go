@@ -96,6 +96,7 @@ func GetListingByID(db *gorm.DB) gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch product"})
 			return
 		}
+		db.Model(&listing).UpdateColumn("view_count", gorm.Expr("view_count + ?", 1))
 		c.JSON(http.StatusOK, listing)
 	}
 }
@@ -141,6 +142,7 @@ func UpdateListing(db *gorm.DB) gin.HandlerFunc {
 			"description": input.Description,
 			"price":       input.Price,
 			"category":    input.Category,
+			"condition":   input.Condition,
 			"location":    input.Location,
 			"images":      input.Images,
 			"latitude":    input.Latitude,
@@ -166,6 +168,9 @@ func SearchListings(db *gorm.DB) gin.HandlerFunc {
 
 		if category := strings.TrimSpace(c.Query("category")); category != "" {
 			query = query.Where("LOWER(category) = LOWER(?)", category)
+		}
+		if condition := strings.TrimSpace(c.Query("condition")); condition != "" {
+			query = query.Where("LOWER(condition) = LOWER(?)", condition)
 		}
 
 		if minPrice := c.Query("min_price"); minPrice != "" {

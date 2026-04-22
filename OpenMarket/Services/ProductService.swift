@@ -11,9 +11,10 @@ struct ProductService {
         return try await APIClient.shared.request("\(Constants.Endpoints.products)/\(id)")
     }
 
-    static func search(category: String = "", minPrice: Double? = nil, maxPrice: Double? = nil, query: String = "") async throws -> [Product] {
+    static func search(category: String = "", condition: String = "", minPrice: Double? = nil, maxPrice: Double? = nil, query: String = "") async throws -> [Product] {
         var params: [String] = []
         if !category.isEmpty && category != "All" { params.append("category=\(category.urlEncoded)") }
+        if !condition.isEmpty && condition != "Any" { params.append("condition=\(condition.urlEncoded)") }
         if let min = minPrice { params.append("min_price=\(min)") }
         if let max = maxPrice { params.append("max_price=\(max)") }
         if !query.isEmpty { params.append("q=\(query.urlEncoded)") }

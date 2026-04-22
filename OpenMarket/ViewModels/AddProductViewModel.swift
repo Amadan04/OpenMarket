@@ -47,6 +47,7 @@ final class AddProductViewModel: ObservableObject {
                 description: description,
                 price: Double(price) ?? 0,
                 category: category,
+                condition: condition,
                 location: location,
                 images: imageURLs,
                 latitude: latitude,

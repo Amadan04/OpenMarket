@@ -66,6 +66,16 @@ struct FilterSheetView: View {
                             }
                         }
 
+                        // Condition
+                        filterSection("Condition") {
+                            FlowLayout(spacing: Spacing.s) {
+                                ForEach(["Any", "New", "Like New", "Good", "Fair"], id: \.self) { cond in
+                                    OMChip(label: cond, active: viewModel.selectedCondition == cond)
+                                        .onTapGesture { viewModel.selectedCondition = cond }
+                                }
+                            }
+                        }
+
                         // Sort
                         filterSection("Sort by") {
                             VStack(spacing: 0) {

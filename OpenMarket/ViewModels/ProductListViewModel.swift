@@ -10,6 +10,7 @@ final class ProductListViewModel: ObservableObject {
     // Filter state
     @Published var searchText = ""
     @Published var selectedCategory = "All"
+    @Published var selectedCondition = "Any"
     @Published var minPrice: Double?
     @Published var maxPrice: Double?
 
@@ -31,6 +32,7 @@ final class ProductListViewModel: ObservableObject {
         do {
             products = try await ProductService.search(
                 category: selectedCategory,
+                condition: selectedCondition,
                 minPrice: minPrice,
                 maxPrice: maxPrice,
                 query: searchText
@@ -42,6 +44,7 @@ final class ProductListViewModel: ObservableObject {
 
     func resetFilters() {
         selectedCategory = "All"
+        selectedCondition = "Any"
         minPrice = nil
         maxPrice = nil
         searchText = ""
