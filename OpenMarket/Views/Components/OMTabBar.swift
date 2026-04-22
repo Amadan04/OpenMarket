@@ -45,11 +45,15 @@ struct OMTabBar: View {
                     .frame(maxWidth: .infinity)
                     .offset(y: -8)
                 } else {
-                    Button { selected = tab } label: {
+                    Button {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) { selected = tab }
+                    } label: {
                         VStack(spacing: 3) {
                             Image(systemName: tab.icon)
                                 .font(.system(size: 22, weight: selected == tab ? .semibold : .regular))
                                 .foregroundStyle(selected == tab ? Color.omAccent : Color.stone400)
+                                .scaleEffect(selected == tab ? 1.15 : 1.0)
+                                .animation(.spring(response: 0.3, dampingFraction: 0.6), value: selected)
                             Text(tab.label)
                                 .font(.system(size: 10, weight: .semibold))
                                 .foregroundStyle(selected == tab ? Color.omAccent : Color.stone400)

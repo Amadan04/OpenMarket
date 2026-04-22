@@ -25,12 +25,14 @@ struct MainTabView: View {
                 switch selectedTab {
                 case .home:     HomeView()
                 case .map:      MapView()
-                case .sell:     HomeView() // placeholder, handled by sheet
+                case .sell:     HomeView()
                 case .messages: ConversationsView()
                 case .profile:  ProfileView()
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .transition(.opacity.combined(with: .scale(scale: 0.98)))
+            .animation(.easeInOut(duration: 0.2), value: selectedTab)
             .safeAreaInset(edge: .bottom) { Color.clear.frame(height: 84) }
 
             OMTabBar(selected: $selectedTab, onSell: { showSell = true })

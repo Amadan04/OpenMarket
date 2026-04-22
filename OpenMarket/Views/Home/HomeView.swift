@@ -160,6 +160,7 @@ struct HomeView: View {
 // MARK: - 2-column grid
 private struct MasonryGrid: View {
     let products: [Product]
+    @State private var appeared = false
 
     private var gridHeight: CGFloat {
         let rows = ceil(Double(products.count) / 2.0)
@@ -170,7 +171,7 @@ private struct MasonryGrid: View {
         GeometryReader { geo in
             let colWidth = (geo.size.width - Spacing.m) / 2
             LazyVGrid(columns: [GridItem(.fixed(colWidth)), GridItem(.fixed(colWidth))], spacing: Spacing.m) {
-                ForEach(products) { product in
+                ForEach(Array(products.enumerated()), id: \.element.id) { idx, product in
                     NavigationLink {
                         ProductDetailView(product: product)
                     } label: {
@@ -178,9 +179,16 @@ private struct MasonryGrid: View {
                             .frame(width: colWidth)
                     }
                     .buttonStyle(.plain)
+                    .opacity(appeared ? 1 : 0)
+                    .offset(y: appeared ? 0 : 16)
+                    .animation(
+                        .spring(response: 0.4, dampingFraction: 0.8).delay(Double(idx) * 0.04),
+                        value: appeared
+                    )
                 }
             }
         }
         .frame(height: gridHeight)
+        .onAppear { appeared = true }
     }
 }

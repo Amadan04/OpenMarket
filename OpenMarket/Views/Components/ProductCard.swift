@@ -1,72 +1,67 @@
 import SwiftUI
 
-// Grid card (2-column masonry style)
 struct ProductCardView: View {
     let product: Product
     var isFavorited: Bool = false
     var onFavorite: (() -> Void)? = nil
+    @State private var pressed = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            ZStack(alignment: .topTrailing) {
-                AsyncImage(url: URL(string: product.images.first ?? "")) { phase in
-                    switch phase {
-                    case .success(let img):
-                        img.resizable()
-                            .scaledToFill()
-                            .frame(height: 130)
-                            .clipped()
-                    default:
-                        Rectangle()
-                            .fill(Color.cream200)
-                            .frame(height: 130)
-                            .overlay(Image(systemName: "photo").font(.title2).foregroundStyle(Color.stone300))
-                    }
+            // Image — fixed height, fills column width via parent grid cell
+            AsyncImage(url: URL(string: product.images.first ?? "")) { phase in
+                switch phase {
+                case .success(let img):
+                    img.resizable().scaledToFill()
+                default:
+                    Color(uiColor: UIColor(Color.cream200))
+                        .overlay(Image(systemName: "photo").font(.system(size: 24)).foregroundStyle(Color.stone300))
                 }
-                .frame(height: 130)
-
-                Button {
-                    onFavorite?()
-                } label: {
+            }
+            .frame(height: 130)
+            .clipped()
+            .overlay(alignment: .topTrailing) {
+                Button { onFavorite?() } label: {
                     Image(systemName: isFavorited ? "heart.fill" : "heart")
-                        .font(.system(size: 15, weight: .semibold))
+                        .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(isFavorited ? Color.omAccent : Color.omText)
-                        .frame(width: 32, height: 32)
+                        .frame(width: 28, height: 28)
                         .background(.regularMaterial)
                         .clipShape(Circle())
                 }
-                .padding(Spacing.s)
+                .padding(6)
+                .buttonStyle(.plain)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
 
-            VStack(alignment: .leading, spacing: 3) {
+            // Text — fixed height so all cards are uniform
+            VStack(alignment: .leading, spacing: 2) {
                 Text(product.title)
-                    .font(.inter(13, weight: .semibold))
+                    .font(.inter(12, weight: .semibold))
                     .foregroundStyle(Color.omText)
                     .lineLimit(2)
-                    .frame(height: 36, alignment: .topLeading)
+                    .frame(height: 32, alignment: .topLeading)
 
                 Text(product.price.formatted(.currency(code: "USD").precision(.fractionLength(0))))
-                    .font(.inter(14, weight: .bold))
+                    .font(.inter(13, weight: .bold))
                     .foregroundStyle(Color.omAccent)
 
-                HStack(spacing: 3) {
-                    Image(systemName: "mappin")
-                        .font(.system(size: 9))
-                        .foregroundStyle(Color.omTextSubtle)
-                    Text(product.location.isEmpty ? "No location" : product.location)
-                        .font(.inter(11))
-                        .foregroundStyle(Color.omTextMuted)
-                        .lineLimit(1)
-                }
+                Text(product.location.isEmpty ? "No location" : product.location)
+                    .font(.inter(10))
+                    .foregroundStyle(Color.omTextMuted)
+                    .lineLimit(1)
             }
-            .padding(.horizontal, Spacing.s)
-            .padding(.vertical, Spacing.s)
+            .padding(8)
+            .frame(height: 76, alignment: .topLeading)
         }
-        .frame(maxWidth: .infinity, minHeight: 220, maxHeight: 220, alignment: .topLeading)
+        // Total card height = 130 + 76 = 206 — always identical
         .background(Color.omBgElevated)
         .clipShape(RoundedRectangle(cornerRadius: Radius.lg))
         .overlay(RoundedRectangle(cornerRadius: Radius.lg).stroke(Color.omBorder, lineWidth: 1))
+        .scaleEffect(pressed ? 0.97 : 1.0)
+        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: pressed)
+        .onLongPressGesture(minimumDuration: 0, maximumDistance: 50) {} onPressingChanged: { isPressing in
+            pressed = isPressing
+        }
     }
 }
 

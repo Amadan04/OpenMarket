@@ -37,6 +37,8 @@ struct OMButton: View {
         }
     }
 
+    @State private var pressed = false
+
     var body: some View {
         Button(action: action) {
             HStack(spacing: Spacing.s) {
@@ -54,7 +56,12 @@ struct OMButton: View {
             .background(bg)
             .clipShape(Capsule())
             .overlay(border.map { Capsule().stroke($0, lineWidth: 1) })
+            .scaleEffect(pressed ? 0.96 : 1.0)
+            .animation(.spring(response: 0.25, dampingFraction: 0.7), value: pressed)
         }
         .buttonStyle(.plain)
+        .onLongPressGesture(minimumDuration: 0, maximumDistance: 50) {} onPressingChanged: { isPressing in
+            pressed = isPressing
+        }
     }
 }
