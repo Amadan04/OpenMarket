@@ -274,13 +274,7 @@ struct AddProductView: View {
                 .clipShape(RoundedRectangle(cornerRadius: Radius.lg))
                 .overlay(RoundedRectangle(cornerRadius: Radius.lg).stroke(Color.omBorder, lineWidth: 1))
 
-                OMField(label: "Location", text: $viewModel.location, placeholder: "City, neighbourhood")
-                    .overlay(alignment: .leading) {
-                        Image(systemName: "mappin.circle.fill")
-                            .foregroundStyle(Color.omAccent)
-                            .padding(.leading, Spacing.l)
-                            .allowsHitTesting(false)
-                    }
+                OMField(label: "Location", text: $viewModel.location, placeholder: "City, neighbourhood", leadingIcon: "mappin.circle.fill")
             }
             .padding(.horizontal, Spacing.xl)
             .padding(.bottom, Spacing.xl)

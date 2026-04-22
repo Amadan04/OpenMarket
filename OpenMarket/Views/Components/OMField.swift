@@ -6,6 +6,7 @@ struct OMField: View {
     var placeholder: String = ""
     var isSecure: Bool = false
     var trailing: String? = nil
+    var leadingIcon: String? = nil
     @State private var showSecure = false
 
     var body: some View {
@@ -20,7 +21,12 @@ struct OMField: View {
                         .font(.inter(12, weight: .medium))
                         .foregroundStyle(Color.omTextMuted)
 
-                    HStack {
+                    HStack(spacing: Spacing.s) {
+                        if let icon = leadingIcon {
+                            Image(systemName: icon)
+                                .font(.system(size: 15))
+                                .foregroundStyle(Color.omAccent)
+                        }
                         if isSecure && !showSecure {
                             SecureField(placeholder, text: $text)
                                 .font(.inter(16))
