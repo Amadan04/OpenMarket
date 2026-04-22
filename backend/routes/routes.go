@@ -37,6 +37,7 @@ func Setup(r *gin.Engine, db *gorm.DB) {
 		api.GET("/products/nearby", handlers.NearbyListings(db))
 		api.GET("/products/:id", handlers.GetListingByID(db))
 		api.PUT("/products/:id", handlers.UpdateListing(db))
+		api.PATCH("/products/:id/sold", handlers.MarkAsSold(db))
 		api.DELETE("/products/:id", handlers.DeleteListing(db))
 
 		api.POST("/reviews", handlers.AddReview(db))

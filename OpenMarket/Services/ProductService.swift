@@ -38,6 +38,10 @@ struct ProductService {
         return try await APIClient.shared.request("\(Constants.Endpoints.products)/\(id)", method: "PUT", body: body)
     }
 
+    static func markAsSold(id: Int) async throws -> Product {
+        return try await APIClient.shared.request("\(Constants.Endpoints.products)/\(id)/sold", method: "PATCH")
+    }
+
     static func delete(id: Int) async throws {
         try await APIClient.shared.requestVoid("\(Constants.Endpoints.products)/\(id)")
     }

@@ -225,6 +225,40 @@ func NearbyListings(db *gorm.DB) gin.HandlerFunc {
 	}
 }
 
+func MarkAsSold(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id, err := strconv.Atoi(c.Param("id"))
+		if err != nil || id <= 0 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid listing id"})
+			return
+		}
+		userID := c.GetUint("user_id")
+
+		var listing models.Listing
+		if err := db.First(&listing, id).Error; err != nil {
+			if err == gorm.ErrRecordNotFound {
+				c.JSON(http.StatusNotFound, gin.H{"error": "Listing not found"})
+				return
+			}
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch listing"})
+			return
+		}
+
+		if listing.UserID != userID {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Unauthorized"})
+			return
+		}
+
+		if err := db.Model(&listing).Update("is_sold", true).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to mark as sold"})
+			return
+		}
+
+		listing.IsSold = true
+		c.JSON(http.StatusOK, listing)
+	}
+}
+
 func DeleteListing(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))

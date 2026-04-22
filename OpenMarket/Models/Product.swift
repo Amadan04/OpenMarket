@@ -10,11 +10,13 @@ struct Product: Codable, Identifiable {
     var images: [String]
     var latitude: Double
     var longitude: Double
+    var isSold: Bool
     let userID: Int
     let createdAt: Date
 
     enum CodingKeys: String, CodingKey {
         case id, title, description, price, category, location, images, latitude, longitude
+        case isSold    = "is_sold"
         case userID    = "user_id"
         case createdAt = "created_at"
     }

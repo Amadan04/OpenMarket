@@ -32,6 +32,19 @@ struct ProductCardView: View {
                 .padding(6)
                 .buttonStyle(.plain)
             }
+            .overlay {
+                if product.isSold {
+                    ZStack {
+                        Color.black.opacity(0.45)
+                        Text("SOLD")
+                            .font(.inter(13, weight: .bold))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 10).padding(.vertical, 4)
+                            .background(Color.black.opacity(0.7))
+                            .clipShape(RoundedRectangle(cornerRadius: 6))
+                    }
+                }
+            }
 
             // Text — fixed height so all cards are uniform
             VStack(alignment: .leading, spacing: 2) {

@@ -4,9 +4,13 @@ struct MyListingsView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
     @StateObject private var viewModel = ProfileViewModel()
     @State private var selectedTab = "Active"
+    @State private var markingID: Int? = nil
     @Environment(\.dismiss) private var dismiss
 
     private let tabs = ["Active", "Sold", "Drafts"]
+
+    private var activeListings: [Product] { viewModel.myListings.filter { !$0.isSold } }
+    private var soldListings: [Product]   { viewModel.myListings.filter { $0.isSold } }
 
     var body: some View {
         ZStack {
@@ -44,8 +48,8 @@ struct MyListingsView: View {
                 // Stats banner
                 HStack(spacing: 0) {
                     let stats: [(String, String)] = [
-                        ("\(viewModel.myListings.count)", "Active"),
-                        ("0", "Sold"),
+                        ("\(activeListings.count)", "Active"),
+                        ("\(soldListings.count)", "Sold"),
                         ("—", "Views"),
                         ("—", "Messages")
                     ]
@@ -95,8 +99,13 @@ struct MyListingsView: View {
                 } else {
                     ScrollView {
                         LazyVStack(spacing: Spacing.m) {
-                            ForEach(viewModel.myListings) { product in
-                                listingRow(product)
+                            let list = selectedTab == "Active" ? activeListings : selectedTab == "Sold" ? soldListings : []
+                            if list.isEmpty {
+                                emptyState
+                            } else {
+                                ForEach(list) { product in
+                                    listingRow(product)
+                                }
                             }
                         }
                         .padding(.horizontal, Spacing.xl)
@@ -113,37 +122,92 @@ struct MyListingsView: View {
         }
     }
 
+    private var emptyState: some View {
+        VStack(spacing: Spacing.m) {
+            Image(systemName: selectedTab == "Sold" ? "bag.badge.checkmark" : "tag")
+                .font(.system(size: 40))
+                .foregroundStyle(Color.omTextMuted)
+            Text(selectedTab == "Sold" ? "No sold items yet" : "No listings yet")
+                .font(.omBodyMed)
+                .foregroundStyle(Color.omTextMuted)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.top, 60)
+    }
+
     private func listingRow(_ product: Product) -> some View {
         HStack(spacing: Spacing.m) {
-            AsyncImage(url: URL(string: product.images.first ?? "")) { phase in
-                switch phase {
-                case .success(let img): img.resizable().scaledToFill()
-                default: Rectangle().fill(Color.cream200)
+            ZStack(alignment: .bottomLeading) {
+                AsyncImage(url: URL(string: product.images.first ?? "")) { phase in
+                    switch phase {
+                    case .success(let img): img.resizable().scaledToFill()
+                    default: Rectangle().fill(Color.cream200)
+                    }
+                }
+                .frame(width: 72, height: 72)
+                .clipShape(RoundedRectangle(cornerRadius: Radius.sm))
+
+                if product.isSold {
+                    Text("SOLD")
+                        .font(.inter(9, weight: .bold))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 5).padding(.vertical, 2)
+                        .background(Color.black.opacity(0.75))
+                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                        .padding(4)
                 }
             }
-            .frame(width: 72, height: 72)
-            .clipShape(RoundedRectangle(cornerRadius: Radius.sm))
 
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 6) {
-                    Circle().fill(Color.sage500).frame(width: 5, height: 5)
-                    Text("ACTIVE")
+                    Circle()
+                        .fill(product.isSold ? Color.omTextMuted : Color.sage500)
+                        .frame(width: 5, height: 5)
+                    Text(product.isSold ? "SOLD" : "ACTIVE")
                         .font(.omMicro)
-                        .foregroundStyle(Color.sage500)
+                        .foregroundStyle(product.isSold ? Color.omTextMuted : Color.sage500)
                         .padding(.horizontal, 8).padding(.vertical, 2)
-                        .background(Color.sage500.opacity(0.12))
+                        .background((product.isSold ? Color.omTextMuted : Color.sage500).opacity(0.12))
                         .clipShape(RoundedRectangle(cornerRadius: 6))
                 }
                 Text(product.title).font(.inter(15, weight: .semibold)).foregroundStyle(Color.omText).lineLimit(1)
                 Text(product.price.formatted(.currency(code: "USD").precision(.fractionLength(0))))
-                    .font(.inter(15, weight: .bold)).foregroundStyle(Color.omAccent)
+                    .font(.inter(15, weight: .bold)).foregroundStyle(product.isSold ? Color.omTextMuted : Color.omAccent)
             }
             Spacer()
-            Image(systemName: "ellipsis").foregroundStyle(Color.omTextMuted)
+
+            if !product.isSold {
+                Button {
+                    Task { await markSold(product) }
+                } label: {
+                    if markingID == product.id {
+                        ProgressView().scaleEffect(0.7).frame(width: 32, height: 32)
+                    } else {
+                        Image(systemName: "checkmark.circle")
+                            .font(.system(size: 22))
+                            .foregroundStyle(Color.omAccent)
+                    }
+                }
+                .buttonStyle(.plain)
+            }
         }
         .padding(Spacing.m)
         .background(Color.omBgElevated)
         .clipShape(RoundedRectangle(cornerRadius: Radius.md))
         .overlay(RoundedRectangle(cornerRadius: Radius.md).stroke(Color.omBorder, lineWidth: 1))
+        .opacity(product.isSold ? 0.6 : 1.0)
+    }
+
+    private func markSold(_ product: Product) async {
+        markingID = product.id
+        do {
+            let updated = try await ProductService.markAsSold(id: product.id)
+            if let idx = viewModel.myListings.firstIndex(where: { $0.id == product.id }) {
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                    viewModel.myListings[idx] = updated
+                }
+            }
+        } catch {}
+        markingID = nil
     }
 }
