@@ -7,6 +7,8 @@ struct SellerProfileView: View {
     @State private var showChat = false
     @Environment(\.dismiss) private var dismiss
     @State private var isFollowing = false
+    @State private var showBlockConfirm = false
+    @State private var isBlocked = false
 
     var body: some View {
         ZStack {
@@ -25,11 +27,22 @@ struct SellerProfileView: View {
                                 .overlay(Circle().stroke(Color.omBorder, lineWidth: 1))
                         }
                         Spacer()
+                        Button { showBlockConfirm = true } label: {
                         Image(systemName: "ellipsis")
                             .frame(width: 40, height: 40)
                             .background(Color.omBgElevated)
                             .clipShape(Circle())
                             .overlay(Circle().stroke(Color.omBorder, lineWidth: 1))
+                            .foregroundStyle(Color.omText)
+                    }
+                    .confirmationDialog("Block this user?", isPresented: $showBlockConfirm, titleVisibility: .visible) {
+                        Button("Block", role: .destructive) {
+                            withAnimation(.spring(response: 0.3)) { isBlocked = true }
+                        }
+                        Button("Cancel", role: .cancel) {}
+                    } message: {
+                        Text("They won't be able to message you and their listings will be hidden.")
+                    }
                     }
                     .padding(.horizontal, Spacing.xl)
                     .padding(.top, Spacing.m)
@@ -116,6 +129,26 @@ struct SellerProfileView: View {
             }
         }
         .navigationBarHidden(true)
+        .overlay {
+            if isBlocked {
+                ZStack {
+                    Color.omBg.ignoresSafeArea()
+                    VStack(spacing: Spacing.l) {
+                        Image(systemName: "nosign")
+                            .font(.system(size: 56))
+                            .foregroundStyle(Color.omError)
+                        Text("User blocked").font(.serif(26)).foregroundStyle(Color.omText)
+                        Text("You won't see their listings or receive messages from them.")
+                            .font(.omBody).foregroundStyle(Color.omTextMuted)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, Spacing.x4)
+                        OMButton(label: "Go back", variant: .secondary, size: .lg) { dismiss() }
+                    }
+                }
+                .transition(.opacity)
+            }
+        }
+        .animation(.easeInOut(duration: 0.3), value: isBlocked)
         .task {
             await viewModel.loadMyListings(userID: sellerID)
             await viewModel.loadMyReviews(userID: sellerID)

@@ -7,6 +7,7 @@ struct ProductDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showChat = false
     @State private var showOffer = false
+    @State private var showReport = false
     @State private var showSellerProfile = false
     @State private var imageIndex = 0
 
@@ -104,6 +105,9 @@ struct ProductDetailView: View {
         .sheet(isPresented: $showOffer) {
             MakeOfferView(product: viewModel.product)
         }
+        .sheet(isPresented: $showReport) {
+            ReportListingView(productTitle: viewModel.product.title)
+        }
         .navigationDestination(isPresented: $showSellerProfile) {
             SellerProfileView(sellerID: viewModel.product.userID)
         }
@@ -155,12 +159,14 @@ struct ProductDetailView: View {
                             .background(.regularMaterial)
                             .clipShape(Circle())
                     }
-                    Image(systemName: "ellipsis")
-                        .font(.system(size: 17))
-                        .foregroundStyle(Color.omText)
-                        .frame(width: 40, height: 40)
-                        .background(.regularMaterial)
-                        .clipShape(Circle())
+                    Button { showReport = true } label: {
+                        Image(systemName: "flag")
+                            .font(.system(size: 17))
+                            .foregroundStyle(Color.omText)
+                            .frame(width: 40, height: 40)
+                            .background(.regularMaterial)
+                            .clipShape(Circle())
+                    }
                 }
             }
             .padding(.horizontal, Spacing.l)
