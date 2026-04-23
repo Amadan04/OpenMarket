@@ -1,9 +1,10 @@
 import Foundation
 
 struct ProductService {
-    static func getAll(page: Int = 1, search: String = "") async throws -> [Product] {
-        var endpoint = "\(Constants.Endpoints.products)?page=\(page)&limit=20"
+    static func getAll(page: Int = 1, limit: Int = 20, search: String = "", sort: String = "") async throws -> [Product] {
+        var endpoint = "\(Constants.Endpoints.products)?page=\(page)&limit=\(limit)"
         if !search.isEmpty { endpoint += "&search=\(search.urlEncoded)" }
+        if !sort.isEmpty { endpoint += "&sort=\(sort)" }
         return try await APIClient.shared.request(endpoint)
     }
 

@@ -22,6 +22,7 @@ func main() {
 		&models.Review{},
 		&models.Favorite{},
 		&models.Message{},
+		&models.Report{},
 	)
 
 	r := gin.Default()

@@ -6,6 +6,8 @@ struct FilterSheetView: View {
 
     @State private var minPriceText = ""
     @State private var maxPriceText = ""
+    @State private var radiusEnabled = false
+    @State private var radiusKm: Double = 10
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -24,6 +26,7 @@ struct FilterSheetView: View {
                     Button("Reset") {
                         viewModel.resetFilters()
                         minPriceText = ""; maxPriceText = ""
+                        radiusEnabled = false; radiusKm = 10
                     }
                     .font(.inter(14, weight: .semibold))
                     .foregroundStyle(Color.omTextMuted)
@@ -76,6 +79,38 @@ struct FilterSheetView: View {
                             }
                         }
 
+                        // Distance
+                        filterSection("Distance") {
+                            VStack(spacing: Spacing.m) {
+                                Toggle(isOn: $radiusEnabled) {
+                                    HStack(spacing: Spacing.s) {
+                                        Image(systemName: "location.fill").foregroundStyle(Color.omAccent)
+                                        Text("Filter by distance").font(.omCallout).foregroundStyle(Color.omText)
+                                    }
+                                }
+                                .tint(Color.omAccent)
+                                .onChange(of: radiusEnabled) { _, on in
+                                    if on { LocationService.shared.requestPermission() }
+                                }
+
+                                if radiusEnabled {
+                                    VStack(spacing: Spacing.s) {
+                                        HStack {
+                                            Text("Within").font(.inter(13)).foregroundStyle(Color.omTextMuted)
+                                            Spacer()
+                                            Text("\(Int(radiusKm)) km")
+                                                .font(.inter(14, weight: .bold))
+                                                .foregroundStyle(Color.omAccent)
+                                        }
+                                        Slider(value: $radiusKm, in: 1...100, step: 1)
+                                            .tint(Color.omAccent)
+                                    }
+                                    .transition(.opacity.combined(with: .move(edge: .top)))
+                                }
+                            }
+                            .animation(.spring(response: 0.3), value: radiusEnabled)
+                        }
+
                         // Sort
                         filterSection("Sort by") {
                             VStack(spacing: 0) {
@@ -102,6 +137,7 @@ struct FilterSheetView: View {
                     OMButton(label: "Show results", size: .lg, fullWidth: true) {
                         viewModel.minPrice = Double(minPriceText)
                         viewModel.maxPrice = Double(maxPriceText)
+                        viewModel.radiusKm = radiusEnabled ? radiusKm : nil
                         Task { await viewModel.applyFilters() }
                         dismiss()
                     }

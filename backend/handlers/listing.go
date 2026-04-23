@@ -70,7 +70,17 @@ func GetListings(db *gorm.DB) gin.HandlerFunc {
 			}
 		}
 
-		if err := query.Order("created_at DESC").Limit(limit).Offset(offset).Find(&listings).Error; err != nil {
+		order := "created_at DESC"
+		switch c.Query("sort") {
+		case "views":
+			order = "view_count DESC"
+		case "price_asc":
+			order = "price ASC"
+		case "price_desc":
+			order = "price DESC"
+		}
+
+		if err := query.Order(order).Limit(limit).Offset(offset).Find(&listings).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch listings"})
 			return
 		}

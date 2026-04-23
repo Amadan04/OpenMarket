@@ -6,8 +6,6 @@ struct HomeView: View {
     @State private var showSearch = false
     @State private var showFilter = false
 
-    private let categories = Constants.Categories.all
-
     var body: some View {
         NavigationStack {
             ZStack {
@@ -41,9 +39,7 @@ struct HomeView: View {
                                 Image(systemName: "magnifyingglass").font(.system(size: 17)).foregroundStyle(Color.omTextMuted)
                                 Text("What are you looking for?").font(.omCallout).foregroundStyle(Color.omTextSubtle)
                                 Spacer()
-                                Button {
-                                    showFilter = true
-                                } label: {
+                                Button { showFilter = true } label: {
                                     Image(systemName: "slider.horizontal.3")
                                         .font(.system(size: 15))
                                         .foregroundStyle(Color.omText)
@@ -60,60 +56,63 @@ struct HomeView: View {
                             .onTapGesture { showSearch = true }
                         }
                         .padding(.horizontal, Spacing.xl)
-                        .padding(.bottom, Spacing.m)
-
-                        // Category chips
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: Spacing.s) {
-                                ForEach(categories, id: \.self) { cat in
-                                    let emoji = categoryEmoji(cat)
-                                    OMChip(label: cat, active: viewModel.selectedCategory == cat, emoji: emoji, large: true)
-                                        .onTapGesture {
-                                            viewModel.selectedCategory = cat
-                                            Task { await viewModel.applyFilters() }
-                                        }
-                                }
-                            }
-                            .padding(.horizontal, Spacing.xl)
-                        }
-                        .padding(.bottom, Spacing.m)
-
-                        // Featured banner
-                        HStack(spacing: Spacing.l) {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("NEARBY TODAY")
-                                    .font(.omMicro)
-                                    .foregroundStyle(.white.opacity(0.7))
-                                Text("\(viewModel.products.count) items near you.")
-                                    .font(.serif(22))
-                                    .foregroundStyle(.white)
-                            }
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .font(.system(size: 20, weight: .semibold))
-                                .foregroundStyle(.white)
-                                .frame(width: 56, height: 56)
-                                .background(Color.clay400)
-                                .clipShape(RoundedRectangle(cornerRadius: 14))
-                        }
-                        .padding(Spacing.xl)
-                        .background(Color.stone700)
-                        .clipShape(RoundedRectangle(cornerRadius: Radius.xl))
-                        .padding(.horizontal, Spacing.xl)
                         .padding(.bottom, Spacing.l)
 
-                        // Section header
+                        // MARK: - Section cards
+
+                        // Categories — full width
+                        sectionCard(
+                            title: "Categories",
+                            subtitle: "Browse by type",
+                            icon: "square.grid.2x2.fill",
+                            bg: Color.stone700,
+                            destination: AnyView(CategoryBrowserView())
+                        )
+                        .padding(.horizontal, Spacing.xl)
+                        .padding(.bottom, Spacing.m)
+
+                        // Trending + Cheap — side by side
+                        HStack(spacing: Spacing.m) {
+                            sectionCard(
+                                title: "Trending",
+                                subtitle: "Most viewed",
+                                icon: "flame.fill",
+                                bg: Color.clay500,
+                                destination: AnyView(SectionProductsView(title: "Trending", subtitle: "Most viewed", sort: "views"))
+                            )
+                            sectionCard(
+                                title: "Cheap Finds",
+                                subtitle: "Best prices",
+                                icon: "tag.fill",
+                                bg: Color.sage500,
+                                destination: AnyView(SectionProductsView(title: "Cheap Finds", subtitle: "Best prices", sort: "price_asc"))
+                            )
+                        }
+                        .padding(.horizontal, Spacing.xl)
+                        .padding(.bottom, Spacing.m)
+
+                        // New Arrivals — full width
+                        sectionCard(
+                            title: "New Arrivals",
+                            subtitle: "Just listed",
+                            icon: "sparkles",
+                            bg: Color.stone600,
+                            destination: AnyView(SectionProductsView(title: "New Arrivals", subtitle: "Just listed", sort: ""))
+                        )
+                        .padding(.horizontal, Spacing.xl)
+                        .padding(.bottom, Spacing.xl)
+
+                        // MARK: - Recently Added grid
                         HStack {
-                            Text("Near you").font(.inter(17, weight: .bold)).foregroundStyle(Color.omText)
+                            Text("Recently Added").font(.inter(17, weight: .bold)).foregroundStyle(Color.omText)
                             Spacer()
-                            NavigationLink("See map") {}
+                            NavigationLink("See map") { }
                                 .font(.inter(13, weight: .semibold))
                                 .foregroundStyle(Color.omAccent)
                         }
                         .padding(.horizontal, Spacing.xl)
                         .padding(.bottom, Spacing.m)
 
-                        // Masonry 2-col grid
                         if viewModel.isLoading {
                             SkeletonGrid(count: 6)
                                 .padding(.horizontal, Spacing.xl)
@@ -139,6 +138,34 @@ struct HomeView: View {
         .task { await viewModel.loadProducts() }
     }
 
+    @ViewBuilder
+    private func sectionCard(title: String, subtitle: String, icon: String, bg: Color, destination: AnyView) -> some View {
+        NavigationLink(destination: destination) {
+            HStack(spacing: Spacing.l) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(subtitle.uppercased())
+                        .font(.omMicro)
+                        .foregroundStyle(.white.opacity(0.6))
+                    Text(title)
+                        .font(.serif(22))
+                        .foregroundStyle(.white)
+                }
+                Spacer()
+                Image(systemName: icon)
+                    .font(.system(size: 22, weight: .semibold))
+                    .foregroundStyle(.white.opacity(0.9))
+                    .frame(width: 52, height: 52)
+                    .background(.white.opacity(0.15))
+                    .clipShape(RoundedRectangle(cornerRadius: Radius.md))
+            }
+            .padding(Spacing.xl)
+            .frame(maxWidth: .infinity)
+            .background(bg)
+            .clipShape(RoundedRectangle(cornerRadius: Radius.xl))
+        }
+        .buttonStyle(PressScaleButtonStyle())
+    }
+
     private var emptyState: some View {
         VStack(spacing: Spacing.m) {
             Image(systemName: "magnifyingglass").font(.system(size: 40)).foregroundStyle(Color.omTextSubtle)
@@ -146,15 +173,6 @@ struct HomeView: View {
             Text("Try adjusting your filters.").font(.omBody).foregroundStyle(Color.omTextMuted)
         }
         .padding(.top, Spacing.x4)
-    }
-
-    private func categoryEmoji(_ cat: String) -> String? {
-        let map: [String: String] = [
-            "All": "✨", "Vehicles": "🚗", "Property": "🏠", "Mobile": "📱",
-            "Electronics": "📷", "Furniture": "🪑", "Fashion": "👕",
-            "Sports": "🚲", "Books": "📚", "Other": "📦"
-        ]
-        return map[cat]
     }
 }
 

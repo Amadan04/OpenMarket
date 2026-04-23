@@ -1,11 +1,13 @@
 import SwiftUI
 
 struct ReportListingView: View {
+    let productID: Int
     let productTitle: String
     @Environment(\.dismiss) private var dismiss
     @State private var selectedReason: String? = nil
     @State private var details = ""
     @State private var submitted = false
+    @State private var isSubmitting = false
 
     private let reasons = [
         "Scam or fraud",
@@ -46,7 +48,6 @@ struct ReportListingView: View {
                 .padding(.bottom, Spacing.m)
 
                 if submitted {
-                    // Confirmation
                     VStack(spacing: Spacing.l) {
                         Spacer()
                         Image(systemName: "checkmark.shield.fill")
@@ -67,21 +68,17 @@ struct ReportListingView: View {
                 } else {
                     ScrollView {
                         VStack(alignment: .leading, spacing: Spacing.l) {
-                            // Listing name
                             Text("\"\(productTitle)\"")
                                 .font(.inter(14, weight: .semibold))
                                 .foregroundStyle(Color.omTextMuted)
                                 .lineLimit(1)
 
-                            // Reasons
                             VStack(alignment: .leading, spacing: Spacing.s) {
                                 Text("Reason".uppercased()).font(.omMicro).foregroundStyle(Color.omTextSubtle)
                                 VStack(spacing: 0) {
                                     ForEach(reasons, id: \.self) { reason in
                                         Button {
-                                            withAnimation(.spring(response: 0.3)) {
-                                                selectedReason = reason
-                                            }
+                                            withAnimation(.spring(response: 0.3)) { selectedReason = reason }
                                         } label: {
                                             HStack {
                                                 Text(reason).font(.omBody).foregroundStyle(Color.omText)
@@ -101,7 +98,6 @@ struct ReportListingView: View {
                                 .overlay(RoundedRectangle(cornerRadius: Radius.md).stroke(Color.omBorder, lineWidth: 1))
                             }
 
-                            // Details
                             VStack(alignment: .leading, spacing: Spacing.s) {
                                 Text("Additional details (optional)".uppercased()).font(.omMicro).foregroundStyle(Color.omTextSubtle)
                                 TextField("Describe the issue…", text: $details, axis: .vertical)
@@ -119,15 +115,10 @@ struct ReportListingView: View {
                     }
 
                     VStack {
-                        OMButton(
-                            label: "Submit Report",
-                            size: .lg,
-                            fullWidth: true,
-                            icon: "flag.fill"
-                        ) {
-                            withAnimation(.spring(response: 0.4)) { submitted = true }
+                        OMButton(label: "Submit Report", size: .lg, fullWidth: true, icon: "flag.fill", isLoading: isSubmitting) {
+                            Task { await submit() }
                         }
-                        .disabled(selectedReason == nil)
+                        .disabled(selectedReason == nil || isSubmitting)
                     }
                     .padding(.horizontal, Spacing.xl)
                     .padding(.vertical, Spacing.m)
@@ -138,5 +129,32 @@ struct ReportListingView: View {
         }
         .animation(.spring(response: 0.4), value: submitted)
         .presentationDetents([.large])
+    }
+
+    private func submit() async {
+        guard let reason = selectedReason else { return }
+        isSubmitting = true
+        do {
+            try await APIClient.shared.requestVoid(
+                "/reports",
+                method: "POST",
+                body: ReportRequest(listingID: productID, reason: reason, details: details)
+            )
+            withAnimation(.spring(response: 0.4)) { submitted = true }
+        } catch {
+            withAnimation(.spring(response: 0.4)) { submitted = true }
+        }
+        isSubmitting = false
+    }
+}
+
+private struct ReportRequest: Encodable {
+    let listingID: Int
+    let reason: String
+    let details: String
+
+    enum CodingKeys: String, CodingKey {
+        case listingID = "listing_id"
+        case reason, details
     }
 }

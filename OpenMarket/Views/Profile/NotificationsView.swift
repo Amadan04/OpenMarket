@@ -2,11 +2,12 @@ import SwiftUI
 
 struct NotificationsView: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var messages = true
-    @State private var newListings = true
-    @State private var priceDrops = false
-    @State private var reviews = true
-    @State private var marketing = false
+
+    @AppStorage("notif_messages")    private var messages    = true
+    @AppStorage("notif_newListings") private var newListings = true
+    @AppStorage("notif_priceDrops")  private var priceDrops  = false
+    @AppStorage("notif_reviews")     private var reviews     = true
+    @AppStorage("notif_marketing")   private var marketing   = false
 
     var body: some View {
         ZStack {
@@ -52,6 +53,9 @@ struct NotificationsView: View {
             }
         }
         .navigationBarHidden(true)
+        .onChange(of: messages)    { _, on in if on { NotificationService.shared.requestPermission() } }
+        .onChange(of: newListings) { _, on in if on { NotificationService.shared.requestPermission() } }
+        .onChange(of: reviews)     { _, on in if on { NotificationService.shared.requestPermission() } }
     }
 
     private func notifGroup(header: String, rows: [(String, String, Binding<Bool>)]) -> some View {

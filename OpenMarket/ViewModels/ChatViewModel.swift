@@ -58,7 +58,16 @@ final class ChatViewModel: ObservableObject {
             while !Task.isCancelled {
                 try? await Task.sleep(nanoseconds: 5_000_000_000) // 5s
                 guard !Task.isCancelled else { break }
+                let prevCount = messages.count
                 await loadMessages(userID: userID)
+                let newCount = messages.count
+                if newCount > prevCount {
+                    let latest = messages.last
+                    NotificationService.shared.scheduleLocalNotification(
+                        title: "New message",
+                        body: latest?.content ?? "You have a new message"
+                    )
+                }
             }
         }
     }

@@ -8,6 +8,7 @@ struct ProductDetailView: View {
     @State private var showChat = false
     @State private var showOffer = false
     @State private var showReport = false
+    @State private var showRateSeller = false
     @State private var showSellerProfile = false
     @State private var imageIndex = 0
 
@@ -76,7 +77,26 @@ struct ProductDetailView: View {
                         }
 
                         // Reviews
-                        if let reviews = viewModel.reviews, reviews.reviewsCount > 0 {
+                        if authViewModel.currentUser?.id != viewModel.product.userID {
+                            if let reviews = viewModel.reviews, reviews.reviewsCount > 0 {
+                                reviewsSection(reviews).padding(.bottom, Spacing.x4)
+                            } else {
+                                Button { showRateSeller = true } label: {
+                                    HStack(spacing: Spacing.s) {
+                                        Image(systemName: "star")
+                                        Text("Be the first to rate this seller")
+                                    }
+                                    .font(.inter(14, weight: .semibold))
+                                    .foregroundStyle(Color.omAccent)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, Spacing.m)
+                                    .background(Color.omAccentSoft)
+                                    .clipShape(RoundedRectangle(cornerRadius: Radius.md))
+                                }
+                                .buttonStyle(.plain)
+                                .padding(.bottom, Spacing.x4)
+                            }
+                        } else if let reviews = viewModel.reviews, reviews.reviewsCount > 0 {
                             reviewsSection(reviews).padding(.bottom, Spacing.x4)
                         }
                     }
@@ -106,7 +126,10 @@ struct ProductDetailView: View {
             MakeOfferView(product: viewModel.product)
         }
         .sheet(isPresented: $showReport) {
-            ReportListingView(productTitle: viewModel.product.title)
+            ReportListingView(productID: viewModel.product.id, productTitle: viewModel.product.title)
+        }
+        .sheet(isPresented: $showRateSeller) {
+            RateSellerView(sellerID: viewModel.product.userID, sellerName: "Seller", product: viewModel.product)
         }
         .navigationDestination(isPresented: $showSellerProfile) {
             SellerProfileView(sellerID: viewModel.product.userID)
@@ -250,7 +273,20 @@ struct ProductDetailView: View {
 
     private func reviewsSection(_ data: ReviewsResponse) -> some View {
         VStack(alignment: .leading, spacing: Spacing.l) {
-            Text("Reviews (\(data.reviewsCount))").font(.inter(15, weight: .semibold)).foregroundStyle(Color.omText)
+            HStack {
+                Text("Reviews (\(data.reviewsCount))").font(.inter(15, weight: .semibold)).foregroundStyle(Color.omText)
+                Spacer()
+                if authViewModel.currentUser?.id != viewModel.product.userID {
+                    Button {
+                        showRateSeller = true
+                    } label: {
+                        Label("Rate Seller", systemImage: "star.fill")
+                            .font(.inter(13, weight: .semibold))
+                            .foregroundStyle(Color.omAccent)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
             ForEach(data.reviews.prefix(3)) { review in
                 VStack(alignment: .leading, spacing: Spacing.s) {
                     HStack {

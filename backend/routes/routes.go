@@ -50,6 +50,8 @@ func Setup(r *gin.Engine, db *gorm.DB) {
 
 		api.POST("/upload", handlers.UploadImage())
 
+		api.POST("/reports", handlers.CreateReport(db))
+
 		api.POST("/messages", handlers.SendMessage(db))
 		api.DELETE("/messages/:id", handlers.DeleteMessage(db))
 		api.GET("/conversations", handlers.GetConversations(db))
