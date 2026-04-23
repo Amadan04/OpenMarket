@@ -46,6 +46,9 @@ func GetListings(db *gorm.DB) gin.HandlerFunc {
 		var listings []models.Listing
 
 		query := db
+		if blocked := blockedIDs(db, c.GetUint("user_id")); len(blocked) > 0 {
+			query = query.Where("user_id NOT IN ?", blocked)
+		}
 
 		if q := c.Query("search"); q != "" {
 			query = query.Where("title LIKE ? OR description LIKE ?", "%"+q+"%", "%"+q+"%")
@@ -175,6 +178,9 @@ func SearchListings(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var listings []models.Listing
 		query := db.Model(&models.Listing{})
+		if blocked := blockedIDs(db, c.GetUint("user_id")); len(blocked) > 0 {
+			query = query.Where("user_id NOT IN ?", blocked)
+		}
 
 		if category := strings.TrimSpace(c.Query("category")); category != "" {
 			query = query.Where("LOWER(category) = LOWER(?)", category)
@@ -225,7 +231,11 @@ func NearbyListings(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		var listings []models.Listing
-		if err := db.Where("latitude != 0 OR longitude != 0").Find(&listings).Error; err != nil {
+		nearbyQuery := db.Where("latitude != 0 OR longitude != 0")
+		if blocked := blockedIDs(db, c.GetUint("user_id")); len(blocked) > 0 {
+			nearbyQuery = nearbyQuery.Where("user_id NOT IN ?", blocked)
+		}
+		if err := nearbyQuery.Find(&listings).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch products"})
 			return
 		}

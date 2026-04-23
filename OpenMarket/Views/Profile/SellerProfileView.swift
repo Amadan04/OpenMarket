@@ -9,6 +9,7 @@ struct SellerProfileView: View {
     @State private var isFollowing = false
     @State private var showBlockConfirm = false
     @State private var isBlocked = false
+    @State private var isTogglingBlock = false
 
     var body: some View {
         ZStack {
@@ -28,20 +29,39 @@ struct SellerProfileView: View {
                         }
                         Spacer()
                         Button { showBlockConfirm = true } label: {
-                        Image(systemName: "ellipsis")
-                            .frame(width: 40, height: 40)
-                            .background(Color.omBgElevated)
-                            .clipShape(Circle())
-                            .overlay(Circle().stroke(Color.omBorder, lineWidth: 1))
-                            .foregroundStyle(Color.omText)
+                        Group {
+                            if isTogglingBlock {
+                                ProgressView().scaleEffect(0.7)
+                            } else {
+                                Image(systemName: "ellipsis")
+                                    .foregroundStyle(Color.omText)
+                            }
+                        }
+                        .frame(width: 40, height: 40)
+                        .background(Color.omBgElevated)
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(Color.omBorder, lineWidth: 1))
                     }
-                    .confirmationDialog("Block this user?", isPresented: $showBlockConfirm, titleVisibility: .visible) {
-                        Button("Block", role: .destructive) {
-                            withAnimation(.spring(response: 0.3)) { isBlocked = true }
+                    .disabled(isTogglingBlock)
+                    .confirmationDialog(
+                        isBlocked ? "Unblock this user?" : "Block this user?",
+                        isPresented: $showBlockConfirm,
+                        titleVisibility: .visible
+                    ) {
+                        if isBlocked {
+                            Button("Unblock") {
+                                Task { await toggleBlock() }
+                            }
+                        } else {
+                            Button("Block", role: .destructive) {
+                                Task { await toggleBlock() }
+                            }
                         }
                         Button("Cancel", role: .cancel) {}
                     } message: {
-                        Text("They won't be able to message you and their listings will be hidden.")
+                        Text(isBlocked
+                            ? "Their listings will appear again and they can message you."
+                            : "Their listings will be hidden and they won't be able to message you.")
                     }
                     }
                     .padding(.horizontal, Spacing.xl)
@@ -150,8 +170,11 @@ struct SellerProfileView: View {
         }
         .animation(.easeInOut(duration: 0.3), value: isBlocked)
         .task {
-            await viewModel.loadMyListings(userID: sellerID)
-            await viewModel.loadMyReviews(userID: sellerID)
+            async let listings: () = viewModel.loadMyListings(userID: sellerID)
+            async let reviews: () = viewModel.loadMyReviews(userID: sellerID)
+            let blocked = await BlockService.isBlocked(userID: sellerID)
+            _ = await (listings, reviews)
+            isBlocked = blocked
         }
         .sheet(isPresented: $showChat) {
             let vm = ChatViewModel()
@@ -256,5 +279,19 @@ struct SellerProfileView: View {
         }
         .padding(.horizontal, Spacing.xl)
         .padding(.top, Spacing.l)
+    }
+
+    private func toggleBlock() async {
+        isTogglingBlock = true
+        defer { isTogglingBlock = false }
+        do {
+            if isBlocked {
+                try await BlockService.unblock(userID: sellerID)
+                withAnimation(.easeInOut(duration: 0.3)) { isBlocked = false }
+            } else {
+                try await BlockService.block(userID: sellerID)
+                withAnimation(.spring(response: 0.3)) { isBlocked = true }
+            }
+        } catch {}
     }
 }

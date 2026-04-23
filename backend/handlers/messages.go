@@ -47,6 +47,13 @@ func SendMessage(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
+		var blockCheck models.Block
+		if err := db.Where("(blocker_id = ? AND blocked_id = ?) OR (blocker_id = ? AND blocked_id = ?)",
+			msg.SenderID, msg.ReceiverID, msg.ReceiverID, msg.SenderID).First(&blockCheck).Error; err == nil {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Cannot message this user"})
+			return
+		}
+
 		if err := db.Create(&msg).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send message"})
 			return
@@ -66,6 +73,12 @@ func GetConversations(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
+		blocked := blockedIDs(db, userID)
+		blockedSet := map[uint]bool{}
+		for _, id := range blocked {
+			blockedSet[id] = true
+		}
+
 		conversationMap := map[uint]conversationSummary{}
 		for _, msg := range messages {
 			participantID := msg.SenderID
@@ -73,6 +86,9 @@ func GetConversations(db *gorm.DB) gin.HandlerFunc {
 				participantID = msg.ReceiverID
 			}
 
+			if blockedSet[participantID] {
+				continue
+			}
 			if _, exists := conversationMap[participantID]; exists {
 				continue
 			}

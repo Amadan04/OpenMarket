@@ -24,6 +24,7 @@ func main() {
 		&models.Message{},
 		&models.Report{},
 		&models.Offer{},
+		&models.Block{},
 	)
 
 	r := gin.Default()
