@@ -19,7 +19,8 @@ final class ProductListViewModel: ObservableObject {
         errorMessage = nil
         defer { isLoading = false }
         do {
-            products = try await ProductService.getAll(search: searchText)
+            let fetched = try await ProductService.getAll(search: searchText)
+            products = fetched.filter { !$0.isSold } + fetched.filter { $0.isSold }
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -30,13 +31,14 @@ final class ProductListViewModel: ObservableObject {
         errorMessage = nil
         defer { isLoading = false }
         do {
-            products = try await ProductService.search(
+            let fetched = try await ProductService.search(
                 category: selectedCategory,
                 condition: selectedCondition,
                 minPrice: minPrice,
                 maxPrice: maxPrice,
                 query: searchText
             )
+            products = fetched.filter { !$0.isSold } + fetched.filter { $0.isSold }
         } catch {
             errorMessage = error.localizedDescription
         }

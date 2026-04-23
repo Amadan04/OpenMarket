@@ -31,8 +31,8 @@ struct LocationPickerView: View {
                         }
                     }
                 }
-                .onTapGesture { point in
-                    if let coord = proxy.convert(point, from: .local) {
+                .simultaneousGesture(SpatialTapGesture().onEnded { value in
+                    if let coord = proxy.convert(value.location, from: .local) {
                         pinCoordinate = coord
                         reverseGeocode(coord)
                         withAnimation {
@@ -42,7 +42,7 @@ struct LocationPickerView: View {
                             ))
                         }
                     }
-                }
+                })
             }
             .ignoresSafeArea()
 

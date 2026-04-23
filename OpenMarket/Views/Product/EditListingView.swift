@@ -2,6 +2,7 @@ import SwiftUI
 
 struct EditListingView: View {
     let product: Product
+    var onDelete: (() -> Void)? = nil
     @Environment(\.dismiss) private var dismiss
 
     @State private var title: String
@@ -11,14 +12,17 @@ struct EditListingView: View {
     @State private var condition: String
     @State private var location: String
     @State private var isSaving = false
+    @State private var isDeleting = false
+    @State private var showDeleteConfirm = false
     @State private var saved = false
     @State private var errorMessage: String?
 
     private let conditions = ["New", "Like New", "Good", "Fair"]
     private let categories = Constants.Categories.all.filter { $0 != "All" }
 
-    init(product: Product) {
+    init(product: Product, onDelete: (() -> Void)? = nil) {
         self.product = product
+        self.onDelete = onDelete
         _title       = State(initialValue: product.title)
         _description = State(initialValue: product.description)
         _price       = State(initialValue: String(format: "%.0f", product.price))
@@ -68,6 +72,19 @@ struct EditListingView: View {
 
                 ScrollView {
                     VStack(spacing: Spacing.l) {
+                        // Stats row
+                        HStack(spacing: 0) {
+                            statCell(value: "\(product.viewCount)", label: "Views", icon: "eye")
+                            Divider().frame(height: 36)
+                            statCell(value: product.condition.isEmpty ? "—" : product.condition, label: "Condition", icon: "sparkles")
+                            Divider().frame(height: 36)
+                            statCell(value: product.isSold ? "Sold" : "Active", label: "Status", icon: "circle.fill")
+                        }
+                        .padding(.vertical, Spacing.m)
+                        .background(Color.omBgElevated)
+                        .clipShape(RoundedRectangle(cornerRadius: Radius.md))
+                        .overlay(RoundedRectangle(cornerRadius: Radius.md).stroke(Color.omBorder, lineWidth: 1))
+
                         // Title
                         OMField(label: "Title", text: $title, placeholder: "What are you selling?", leadingIcon: "tag")
 
@@ -125,6 +142,29 @@ struct EditListingView: View {
                             .clipShape(RoundedRectangle(cornerRadius: Radius.md))
                         }
 
+                        // Delete button
+                        Button {
+                            showDeleteConfirm = true
+                        } label: {
+                            HStack(spacing: Spacing.s) {
+                                if isDeleting {
+                                    ProgressView().scaleEffect(0.8).tint(Color.omDanger)
+                                } else {
+                                    Image(systemName: "trash")
+                                }
+                                Text("Delete listing")
+                            }
+                            .font(.inter(15, weight: .semibold))
+                            .foregroundStyle(Color.omDanger)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, Spacing.m)
+                            .background(Color.omDanger.opacity(0.08))
+                            .clipShape(RoundedRectangle(cornerRadius: Radius.md))
+                            .overlay(RoundedRectangle(cornerRadius: Radius.md).stroke(Color.omDanger.opacity(0.2), lineWidth: 1))
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(isDeleting)
+
                         if saved {
                             HStack(spacing: Spacing.s) {
                                 Image(systemName: "checkmark.circle.fill").foregroundStyle(Color.omOk)
@@ -140,6 +180,27 @@ struct EditListingView: View {
             }
         }
         .navigationBarHidden(true)
+        .confirmationDialog("Delete this listing?", isPresented: $showDeleteConfirm, titleVisibility: .visible) {
+            Button("Delete", role: .destructive) { Task { await deleteProduct() } }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This can't be undone.")
+        }
+    }
+
+    private func statCell(value: String, label: String, icon: String) -> some View {
+        VStack(spacing: 4) {
+            Image(systemName: icon)
+                .font(.system(size: 14))
+                .foregroundStyle(Color.omAccent)
+            Text(value)
+                .font(.inter(15, weight: .bold))
+                .foregroundStyle(Color.omText)
+            Text(label)
+                .font(.omMicro)
+                .foregroundStyle(Color.omTextMuted)
+        }
+        .frame(maxWidth: .infinity)
     }
 
     private var canSave: Bool {
@@ -169,5 +230,17 @@ struct EditListingView: View {
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
+
+    private func deleteProduct() async {
+        isDeleting = true
+        do {
+            try await ProductService.delete(id: product.id)
+            onDelete?()
+            dismiss()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+        isDeleting = false
     }
 }

@@ -120,6 +120,13 @@ struct MyListingsView: View {
             }
         }
         .navigationBarHidden(true)
+        .navigationDestination(item: $navigateTo) { product in
+            EditListingView(product: product, onDelete: {
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                    viewModel.myListings.removeAll { $0.id == product.id }
+                }
+            })
+        }
         .task {
             if let id = authViewModel.currentUser?.id {
                 await viewModel.loadMyListings(userID: id)
@@ -138,15 +145,6 @@ struct MyListingsView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.top, 60)
-    }
-
-    private func delete(_ product: Product) async {
-        do {
-            try await ProductService.delete(id: product.id)
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                viewModel.myListings.removeAll { $0.id == product.id }
-            }
-        } catch {}
     }
 
     private func listingRow(_ product: Product) -> some View {
@@ -210,18 +208,11 @@ struct MyListingsView: View {
         .clipShape(RoundedRectangle(cornerRadius: Radius.md))
         .overlay(RoundedRectangle(cornerRadius: Radius.md).stroke(Color.omBorder, lineWidth: 1))
         .opacity(product.isSold ? 0.6 : 1.0)
-        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-            Button(role: .destructive) {
-                Task { await delete(product) }
-            } label: {
-                Label("Delete", systemImage: "trash")
-            }
-            NavigationLink { EditListingView(product: product) } label: {
-                Label("Edit", systemImage: "pencil")
-            }
-            .tint(Color.omAccent)
-        }
+        .contentShape(Rectangle())
+        .onTapGesture { navigateTo = product }
     }
+
+    @State private var navigateTo: Product? = nil
 
     private func markSold(_ product: Product) async {
         markingID = product.id
