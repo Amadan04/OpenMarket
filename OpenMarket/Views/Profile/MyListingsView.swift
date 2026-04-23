@@ -189,18 +189,31 @@ struct MyListingsView: View {
             Spacer()
 
             if !product.isSold {
-                Button {
-                    Task { await markSold(product) }
-                } label: {
-                    if markingID == product.id {
-                        ProgressView().scaleEffect(0.7).frame(width: 32, height: 32)
-                    } else {
-                        Image(systemName: "checkmark.circle")
-                            .font(.system(size: 22))
+                VStack(spacing: Spacing.s) {
+                    NavigationLink {
+                        IncomingOffersView(product: product)
+                    } label: {
+                        Image(systemName: "tag.fill")
+                            .font(.system(size: 14))
                             .foregroundStyle(Color.omAccent)
+                            .frame(width: 32, height: 32)
+                            .background(Color.omAccentSoft)
+                            .clipShape(Circle())
                     }
+
+                    Button {
+                        Task { await markSold(product) }
+                    } label: {
+                        if markingID == product.id {
+                            ProgressView().scaleEffect(0.7).frame(width: 32, height: 32)
+                        } else {
+                            Image(systemName: "checkmark.circle")
+                                .font(.system(size: 22))
+                                .foregroundStyle(Color.omAccent)
+                        }
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
         }
         .padding(Spacing.m)

@@ -23,6 +23,7 @@ func main() {
 		&models.Favorite{},
 		&models.Message{},
 		&models.Report{},
+		&models.Offer{},
 	)
 
 	r := gin.Default()

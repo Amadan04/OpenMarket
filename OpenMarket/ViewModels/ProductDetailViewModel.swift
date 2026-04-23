@@ -9,6 +9,9 @@ final class ProductDetailViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
 
+    @Published var myOffer: Offer? = nil
+    @Published var isWithdrawingOffer = false
+
     init(product: Product) {
         self.product = product
     }
@@ -18,6 +21,25 @@ final class ProductDetailViewModel: ObservableObject {
             reviews = try await ReviewService.getReviews(forSellerID: product.userID)
         } catch {
             errorMessage = error.localizedDescription
+        }
+    }
+
+    func loadMyOffer() async {
+        do {
+            let offers = try await OfferService.getMyOffers()
+            myOffer = offers.first { $0.listingID == product.id && $0.status != .withdrawn }
+        } catch {}
+    }
+
+    func withdrawOffer() async {
+        guard let offer = myOffer else { return }
+        isWithdrawingOffer = true
+        defer { isWithdrawingOffer = false }
+        do {
+            try await OfferService.withdraw(offerID: offer.id)
+            myOffer = nil
+        } catch {
+            errorMessage = "Failed to withdraw offer."
         }
     }
 

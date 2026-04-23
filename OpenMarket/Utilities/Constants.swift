@@ -19,6 +19,7 @@ enum Constants {
         static let conversations  = "/conversations"
 
         static let reviews        = "/reviews"
+        static let offers         = "/offers"
         static let upload         = "/upload"
     }
 

@@ -52,6 +52,12 @@ func Setup(r *gin.Engine, db *gorm.DB) {
 
 		api.POST("/reports", handlers.CreateReport(db))
 
+		api.POST("/offers", handlers.CreateOffer(db))
+		api.GET("/offers/my", handlers.GetMyOffers(db))
+		api.GET("/products/:id/offers", handlers.GetListingOffers(db))
+		api.PATCH("/offers/:id", handlers.RespondToOffer(db))
+		api.DELETE("/offers/:id", handlers.WithdrawOffer(db))
+
 		api.POST("/messages", handlers.SendMessage(db))
 		api.DELETE("/messages/:id", handlers.DeleteMessage(db))
 		api.GET("/conversations", handlers.GetConversations(db))

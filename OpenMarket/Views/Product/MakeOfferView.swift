@@ -2,11 +2,13 @@ import SwiftUI
 
 struct MakeOfferView: View {
     let product: Product
+    var onOfferSent: ((Offer) -> Void)? = nil
+
     @Environment(\.dismiss) private var dismiss
     @State private var offerText = ""
     @State private var note = ""
     @State private var isSending = false
-    @State private var sent = false
+    @State private var errorMessage: String? = nil
     @FocusState private var offerFocused: Bool
 
     private var suggestedOffers: [Double] {
@@ -18,13 +20,11 @@ struct MakeOfferView: View {
         ZStack {
             Color.omBg.ignoresSafeArea()
             VStack(spacing: 0) {
-                // Handle
                 RoundedRectangle(cornerRadius: 3)
                     .fill(Color.omBorderStrong)
                     .frame(width: 40, height: 5)
                     .padding(.top, Spacing.m)
 
-                // Header
                 HStack {
                     Button { dismiss() } label: {
                         Image(systemName: "xmark")
@@ -57,9 +57,13 @@ struct MakeOfferView: View {
                             .clipShape(RoundedRectangle(cornerRadius: Radius.sm))
 
                             VStack(alignment: .leading, spacing: 3) {
-                                Text(product.title).font(.inter(14, weight: .semibold)).foregroundStyle(Color.omText).lineLimit(1)
+                                Text(product.title)
+                                    .font(.inter(14, weight: .semibold))
+                                    .foregroundStyle(Color.omText)
+                                    .lineLimit(1)
                                 Text("Listed for \(product.price.formatted(.currency(code: "USD").precision(.fractionLength(0))))")
-                                    .font(.inter(13)).foregroundStyle(Color.omTextMuted)
+                                    .font(.inter(13))
+                                    .foregroundStyle(Color.omTextMuted)
                             }
                             Spacer()
                         }
@@ -83,7 +87,8 @@ struct MakeOfferView: View {
                             .background(Color.omBgElevated)
                             .clipShape(RoundedRectangle(cornerRadius: Radius.md))
                             .overlay(RoundedRectangle(cornerRadius: Radius.md).stroke(
-                                offerFocused ? Color.omAccent : Color.omBorder, lineWidth: offerFocused ? 1.5 : 1))
+                                offerFocused ? Color.omAccent : Color.omBorder,
+                                lineWidth: offerFocused ? 1.5 : 1))
                         }
 
                         // Quick suggestions
@@ -122,20 +127,19 @@ struct MakeOfferView: View {
                                 .overlay(RoundedRectangle(cornerRadius: Radius.md).stroke(Color.omBorder, lineWidth: 1))
                         }
 
-                        if sent {
+                        if let err = errorMessage {
                             HStack(spacing: Spacing.s) {
-                                Image(systemName: "checkmark.circle.fill").foregroundStyle(Color.omOk)
-                                Text("Offer sent to seller!").font(.inter(14, weight: .semibold)).foregroundStyle(Color.omOk)
+                                Image(systemName: "exclamationmark.circle.fill").foregroundStyle(Color.omError)
+                                Text(err).font(.inter(13)).foregroundStyle(Color.omError)
                             }
-                            .transition(.scale.combined(with: .opacity))
+                            .transition(.opacity)
                         }
                     }
                     .padding(.horizontal, Spacing.xl)
                     .padding(.bottom, Spacing.xl)
-                    .animation(.spring(response: 0.35), value: sent)
+                    .animation(.spring(response: 0.35), value: errorMessage)
                 }
 
-                // Send button
                 VStack {
                     OMButton(
                         label: "Send Offer",
@@ -159,26 +163,26 @@ struct MakeOfferView: View {
     }
 
     private var canSend: Bool {
-        if let val = Double(offerText), val > 0 { return true }
-        return false
+        guard let val = Double(offerText) else { return false }
+        return val > 0
     }
 
     private func sendOffer() async {
         guard let val = Double(offerText), val > 0 else { return }
         isSending = true
+        errorMessage = nil
         defer { isSending = false }
 
-        var message = "💰 Offer: \(val.formatted(.currency(code: "USD").precision(.fractionLength(0)))) for \"\(product.title)\""
-        if !note.trimmingCharacters(in: .whitespaces).isEmpty {
-            message += "\n\"\(note.trimmingCharacters(in: .whitespaces))\""
-        }
-
         do {
-            let vm = ChatViewModel()
-            await vm.openChat(with: product.userID)
-            await vm.sendMessage(content: message)
-            withAnimation(.spring(response: 0.4)) { sent = true }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { dismiss() }
+            let offer = try await OfferService.create(
+                listingID: product.id,
+                amount: val,
+                note: note.trimmingCharacters(in: .whitespaces)
+            )
+            onOfferSent?(offer)
+            dismiss()
+        } catch {
+            withAnimation { errorMessage = "Failed to send offer. Please try again." }
         }
     }
 }

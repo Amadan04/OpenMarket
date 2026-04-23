@@ -112,7 +112,9 @@ struct ProductDetailView: View {
         }
         .navigationBarHidden(true)
         .task {
-            await viewModel.loadReviews()
+            async let reviews: () = viewModel.loadReviews()
+            async let offer: () = viewModel.loadMyOffer()
+            _ = await (reviews, offer)
         }
         .sheet(isPresented: $showChat) {
             if let user = authViewModel.currentUser {
@@ -123,7 +125,9 @@ struct ProductDetailView: View {
             }
         }
         .sheet(isPresented: $showOffer) {
-            MakeOfferView(product: viewModel.product)
+            MakeOfferView(product: viewModel.product) { offer in
+                viewModel.myOffer = offer
+            }
         }
         .sheet(isPresented: $showReport) {
             ReportListingView(productID: viewModel.product.id, productTitle: viewModel.product.title)
@@ -308,32 +312,124 @@ struct ProductDetailView: View {
     }
 
     private var stickyBar: some View {
-        HStack(spacing: Spacing.m) {
-            Button { Task { await viewModel.toggleFavorite() } } label: {
-                Image(systemName: viewModel.isFavorited ? "heart.fill" : "heart")
-                    .font(.system(size: 22))
-                    .foregroundStyle(viewModel.isFavorited ? Color.omAccent : Color.omText)
-                    .frame(width: 56, height: 56)
-                    .background(Color.omBgElevated)
-                    .clipShape(Circle())
-                    .overlay(Circle().stroke(Color.omBorderStrong, lineWidth: 1))
+        VStack(spacing: 0) {
+            // Offer status banner shown above buttons when an offer exists
+            if let offer = viewModel.myOffer,
+               authViewModel.currentUser?.id != viewModel.product.userID {
+                offerStatusBanner(offer)
+                    .padding(.horizontal, Spacing.xl)
+                    .padding(.top, Spacing.m)
             }
 
-            OMButton(label: "Make Offer", variant: .secondary, size: .lg, icon: "tag.fill") {
-                showOffer = true
-            }
+            HStack(spacing: Spacing.m) {
+                Button { Task { await viewModel.toggleFavorite() } } label: {
+                    Image(systemName: viewModel.isFavorited ? "heart.fill" : "heart")
+                        .font(.system(size: 22))
+                        .foregroundStyle(viewModel.isFavorited ? Color.omAccent : Color.omText)
+                        .frame(width: 56, height: 56)
+                        .background(Color.omBgElevated)
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(Color.omBorderStrong, lineWidth: 1))
+                }
 
-            OMButton(label: "Message", size: .lg, icon: "bubble.left.fill") {
-                showChat = true
+                if authViewModel.currentUser?.id == viewModel.product.userID {
+                    OMButton(label: "Message", size: .lg, icon: "bubble.left.fill", fullWidth: true) {
+                        showChat = true
+                    }
+                } else if viewModel.myOffer == nil {
+                    OMButton(label: "Make Offer", variant: .secondary, size: .lg, icon: "tag.fill") {
+                        showOffer = true
+                    }
+                    OMButton(label: "Message", size: .lg, icon: "bubble.left.fill") {
+                        showChat = true
+                    }
+                } else {
+                    OMButton(label: "Message", size: .lg, icon: "bubble.left.fill", fullWidth: true) {
+                        showChat = true
+                    }
+                }
             }
+            .padding(.horizontal, Spacing.xl)
+            .padding(.vertical, Spacing.m)
+            .padding(.bottom, Spacing.xl)
         }
-        .padding(.horizontal, Spacing.xl)
-        .padding(.vertical, Spacing.m)
-        .padding(.bottom, Spacing.xl)
         .background(
             Rectangle().fill(.ultraThinMaterial)
                 .overlay(alignment: .top) { Color.omBorder.frame(height: 0.5) }
                 .ignoresSafeArea()
         )
+    }
+
+    @ViewBuilder
+    private func offerStatusBanner(_ offer: Offer) -> some View {
+        HStack(spacing: Spacing.s) {
+            Image(systemName: offerStatusIcon(offer.status))
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(offerStatusColor(offer.status))
+
+            VStack(alignment: .leading, spacing: 1) {
+                Text(offerStatusLabel(offer))
+                    .font(.inter(13, weight: .semibold))
+                    .foregroundStyle(offerStatusColor(offer.status))
+                if let counter = offer.counterAmount, offer.status == .countered {
+                    Text("Counter offer: \(counter.formatted(.currency(code: "USD").precision(.fractionLength(0))))")
+                        .font(.inter(12))
+                        .foregroundStyle(Color.omTextMuted)
+                }
+            }
+
+            Spacer()
+
+            if offer.status == .pending {
+                Button {
+                    Task { await viewModel.withdrawOffer() }
+                } label: {
+                    if viewModel.isWithdrawingOffer {
+                        ProgressView().scaleEffect(0.7)
+                    } else {
+                        Text("Withdraw")
+                            .font(.inter(12, weight: .semibold))
+                            .foregroundStyle(Color.omTextMuted)
+                    }
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, Spacing.m)
+        .padding(.vertical, Spacing.s)
+        .background(offerStatusColor(offer.status).opacity(0.1))
+        .clipShape(RoundedRectangle(cornerRadius: Radius.sm))
+        .overlay(RoundedRectangle(cornerRadius: Radius.sm).stroke(offerStatusColor(offer.status).opacity(0.25), lineWidth: 1))
+        .animation(.spring(response: 0.35), value: offer.status)
+    }
+
+    private func offerStatusLabel(_ offer: Offer) -> String {
+        switch offer.status {
+        case .pending:   return "Offer of \(offer.amount.formatted(.currency(code: "USD").precision(.fractionLength(0)))) pending"
+        case .accepted:  return "Offer accepted!"
+        case .declined:  return "Offer declined"
+        case .countered: return "Seller countered your offer"
+        case .withdrawn: return "Offer withdrawn"
+        }
+    }
+
+    private func offerStatusIcon(_ status: OfferStatus) -> String {
+        switch status {
+        case .pending:   return "clock"
+        case .accepted:  return "checkmark.circle.fill"
+        case .declined:  return "xmark.circle.fill"
+        case .countered: return "arrow.left.arrow.right.circle.fill"
+        case .withdrawn: return "minus.circle"
+        }
+    }
+
+    private func offerStatusColor(_ status: OfferStatus) -> Color {
+        switch status {
+        case .pending:   return Color.omAccent
+        case .accepted:  return Color.omOk
+        case .declined:  return Color.omError
+        case .countered: return Color.stone600
+        case .withdrawn: return Color.omTextMuted
+        }
     }
 }
