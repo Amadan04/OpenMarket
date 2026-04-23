@@ -4,7 +4,6 @@ struct ProductCardView: View {
     let product: Product
     var isFavorited: Bool = false
     var onFavorite: (() -> Void)? = nil
-    @State private var pressed = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -70,11 +69,6 @@ struct ProductCardView: View {
         .background(Color.omBgElevated)
         .clipShape(RoundedRectangle(cornerRadius: Radius.lg))
         .overlay(RoundedRectangle(cornerRadius: Radius.lg).stroke(Color.omBorder, lineWidth: 1))
-        .scaleEffect(pressed ? 0.97 : 1.0)
-        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: pressed)
-        .onLongPressGesture(minimumDuration: 0, maximumDistance: 50) {} onPressingChanged: { isPressing in
-            pressed = isPressing
-        }
     }
 }
 

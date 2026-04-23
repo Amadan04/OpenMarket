@@ -18,6 +18,7 @@ struct Product: Codable, Identifiable {
 
     enum CodingKeys: String, CodingKey {
         case id, title, description, price, category, location, images, latitude, longitude
+        case condition
         case viewCount = "view_count"
         case isSold    = "is_sold"
         case userID    = "user_id"

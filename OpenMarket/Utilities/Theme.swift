@@ -43,6 +43,7 @@ extension Color {
     static let omAccentSoft  = Color(hex: "#FBEEE6")
 
     static let omDanger      = Color(hex: "#B8413A")
+    static let omError       = Color(hex: "#B8413A")
     static let omWarn        = Color(hex: "#C98B2B")
     static let omOk          = Color(hex: "#6F8349")
 

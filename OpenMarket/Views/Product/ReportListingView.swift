@@ -68,7 +68,7 @@ struct ReportListingView: View {
                     ScrollView {
                         VStack(alignment: .leading, spacing: Spacing.l) {
                             // Listing name
-                            Text(""\(productTitle)"")
+                            Text("\"\(productTitle)\"")
                                 .font(.inter(14, weight: .semibold))
                                 .foregroundStyle(Color.omTextMuted)
                                 .lineLimit(1)
