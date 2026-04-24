@@ -49,9 +49,13 @@ struct IncomingOffersView: View {
                 Divider()
 
                 if viewModel.isLoading {
-                    Spacer()
-                    ProgressView()
-                    Spacer()
+                    ScrollView {
+                        LazyVStack(spacing: Spacing.m) {
+                            ForEach(0..<4, id: \.self) { _ in SkeletonRowView() }
+                        }
+                        .padding(.horizontal, Spacing.xl)
+                        .padding(.vertical, Spacing.m)
+                    }
                 } else if viewModel.offers.isEmpty {
                     emptyState
                 } else {

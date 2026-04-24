@@ -27,7 +27,13 @@ struct ReviewsView: View {
                 .padding(.vertical, Spacing.m)
 
                 if isLoading {
-                    Spacer(); ProgressView(); Spacer()
+                    ScrollView {
+                        LazyVStack(spacing: Spacing.m) {
+                            ForEach(0..<5, id: \.self) { _ in SkeletonRowView() }
+                        }
+                        .padding(.horizontal, Spacing.xl)
+                        .padding(.top, Spacing.m)
+                    }
                 } else if let data = reviewsResponse {
                     ScrollView {
                         VStack(spacing: Spacing.l) {

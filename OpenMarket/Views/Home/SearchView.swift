@@ -43,9 +43,13 @@ struct SearchView: View {
                 .padding(.vertical, Spacing.m)
 
                 if viewModel.isLoading {
-                    Spacer()
-                    ProgressView()
-                    Spacer()
+                    ScrollView {
+                        LazyVStack(spacing: Spacing.m) {
+                            ForEach(0..<6, id: \.self) { _ in SkeletonRowView() }
+                        }
+                        .padding(.horizontal, Spacing.xl)
+                        .padding(.top, Spacing.m)
+                    }
                 } else if !viewModel.products.isEmpty {
                     // Results
                     ScrollView {
