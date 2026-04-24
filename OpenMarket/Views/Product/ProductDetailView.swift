@@ -113,6 +113,7 @@ struct ProductDetailView: View {
         }
         .navigationBarHidden(true)
         .task {
+            RecentlyViewedStore.shared.record(viewModel.product)
             async let reviews: () = viewModel.loadReviews()
             async let offer: () = viewModel.loadMyOffer()
             _ = await (reviews, offer)

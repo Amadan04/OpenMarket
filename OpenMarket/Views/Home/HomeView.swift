@@ -3,6 +3,7 @@ import SwiftUI
 struct HomeView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
     @StateObject private var viewModel = ProductListViewModel()
+    @ObservedObject private var recentStore = RecentlyViewedStore.shared
     @State private var showSearch = false
     @State private var showFilter = false
 
@@ -102,6 +103,35 @@ struct HomeView: View {
                         .padding(.horizontal, Spacing.xl)
                         .padding(.bottom, Spacing.xl)
 
+                        // MARK: - Recently Viewed
+                        if !recentStore.products.isEmpty {
+                            HStack {
+                                Text("Recently Viewed").font(.inter(17, weight: .bold)).foregroundStyle(Color.omText)
+                                Spacer()
+                                Button {
+                                    RecentlyViewedStore.shared.clear()
+                                } label: {
+                                    Text("Clear").font(.inter(13, weight: .semibold)).foregroundStyle(Color.omTextMuted)
+                                }
+                            }
+                            .padding(.horizontal, Spacing.xl)
+                            .padding(.bottom, Spacing.m)
+
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: Spacing.m) {
+                                    ForEach(recentStore.products) { product in
+                                        NavigationLink { ProductDetailView(product: product) } label: {
+                                            recentCard(product)
+                                        }
+                                        .buttonStyle(PressScaleButtonStyle())
+                                    }
+                                }
+                                .padding(.horizontal, Spacing.xl)
+                                .padding(.bottom, Spacing.s)
+                            }
+                            .padding(.bottom, Spacing.xl)
+                        }
+
                         // MARK: - Recently Added grid
                         HStack {
                             Text("Recently Added").font(.inter(17, weight: .bold)).foregroundStyle(Color.omText)
@@ -136,6 +166,35 @@ struct HomeView: View {
             }
         }
         .task { await viewModel.loadProducts() }
+    }
+
+    private func recentCard(_ product: Product) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            AsyncImage(url: URL(string: product.images.first ?? "")) { phase in
+                switch phase {
+                case .success(let img): img.resizable().scaledToFill()
+                default: Rectangle().fill(Color.cream200)
+                }
+            }
+            .frame(width: 120, height: 100)
+            .clipped()
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(product.title)
+                    .font(.inter(12, weight: .semibold))
+                    .foregroundStyle(Color.omText)
+                    .lineLimit(1)
+                Text(product.price.formatted(.currency(code: "USD").precision(.fractionLength(0))))
+                    .font(.inter(12, weight: .bold))
+                    .foregroundStyle(Color.omAccent)
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 6)
+        }
+        .frame(width: 120)
+        .background(Color.omBgElevated)
+        .clipShape(RoundedRectangle(cornerRadius: Radius.md))
+        .overlay(RoundedRectangle(cornerRadius: Radius.md).stroke(Color.omBorder, lineWidth: 1))
     }
 
     @ViewBuilder
