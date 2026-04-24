@@ -21,6 +21,7 @@ type Offer struct {
 	Note          string      `json:"note"`
 	Status        OfferStatus `gorm:"default:pending;not null" json:"status"`
 	CounterAmount *float64    `json:"counter_amount,omitempty"`
+	BuyerName     string      `gorm:"-" json:"buyer_name,omitempty"`
 	CreatedAt     time.Time   `json:"created_at"`
 	UpdatedAt     time.Time   `json:"updated_at"`
 }

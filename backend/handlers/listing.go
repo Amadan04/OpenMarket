@@ -59,6 +59,8 @@ func GetListings(db *gorm.DB) gin.HandlerFunc {
 			if uid, err := strconv.Atoi(userID); err == nil && uid > 0 {
 				query = query.Where("user_id = ?", uid)
 			}
+		} else {
+			query = query.Where("is_sold = ?", false)
 		}
 
 		limit := 20
@@ -178,7 +180,7 @@ func UpdateListing(db *gorm.DB) gin.HandlerFunc {
 func SearchListings(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var listings []models.Listing
-		query := db.Model(&models.Listing{})
+		query := db.Model(&models.Listing{}).Where("is_sold = ?", false)
 		if blocked := blockedIDs(db, c.GetUint("user_id")); len(blocked) > 0 {
 			query = query.Where("user_id NOT IN ?", blocked)
 		}
@@ -232,7 +234,7 @@ func NearbyListings(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		var listings []models.Listing
-		nearbyQuery := db.Where("latitude != 0 OR longitude != 0")
+		nearbyQuery := db.Where("latitude != 0 OR longitude != 0").Where("is_sold = ?", false)
 		if blocked := blockedIDs(db, c.GetUint("user_id")); len(blocked) > 0 {
 			nearbyQuery = nearbyQuery.Where("user_id NOT IN ?", blocked)
 		}

@@ -101,10 +101,10 @@ struct IncomingOffersView: View {
         VStack(alignment: .leading, spacing: Spacing.m) {
             // Buyer + amount
             HStack(alignment: .top, spacing: Spacing.m) {
-                AvatarView(initial: "B", size: 44, tone: .clay)
+                AvatarView(initial: (offer.buyerName ?? "B").prefix(1).description, size: 44, tone: .clay)
 
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("Buyer #\(offer.buyerID)")
+                    Text(offer.buyerName ?? "Buyer #\(offer.buyerID)")
                         .font(.inter(14, weight: .semibold))
                         .foregroundStyle(Color.omText)
                     Text(offer.createdAt, style: .relative)

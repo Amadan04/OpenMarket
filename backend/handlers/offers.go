@@ -111,6 +111,24 @@ func GetListingOffers(db *gorm.DB) gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch offers"})
 			return
 		}
+
+		// Batch-fetch buyer names
+		buyerIDs := make([]uint, 0, len(offers))
+		for _, o := range offers {
+			buyerIDs = append(buyerIDs, o.BuyerID)
+		}
+		if len(buyerIDs) > 0 {
+			var users []models.User
+			db.Select("id, name").Where("id IN ?", buyerIDs).Find(&users)
+			nameByID := make(map[uint]string, len(users))
+			for _, u := range users {
+				nameByID[u.ID] = u.Name
+			}
+			for i := range offers {
+				offers[i].BuyerName = nameByID[offers[i].BuyerID]
+			}
+		}
+
 		c.JSON(http.StatusOK, offers)
 	}
 }
