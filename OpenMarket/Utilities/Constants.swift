@@ -21,6 +21,7 @@ enum Constants {
         static let reviews        = "/reviews"
         static let offers         = "/offers"
         static let blocks         = "/blocks"
+        static let devices        = "/devices"
         static let upload         = "/upload"
     }
 

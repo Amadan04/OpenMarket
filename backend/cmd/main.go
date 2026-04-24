@@ -25,6 +25,7 @@ func main() {
 		&models.Report{},
 		&models.Offer{},
 		&models.Block{},
+		&models.DeviceToken{},
 	)
 
 	r := gin.Default()

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -9,6 +10,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
+
+func formatPrice(amount float64) string {
+	return fmt.Sprintf("$%.0f", amount)
+}
 
 func CreateOffer(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -62,6 +67,10 @@ func CreateOffer(db *gorm.DB) gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create offer"})
 			return
 		}
+
+		sendAPNSToUser(db, offer.SellerID,
+			"New offer on your listing",
+			fmt.Sprintf("Someone offered %s", formatPrice(offer.Amount)))
 		c.JSON(http.StatusCreated, offer)
 	}
 }
@@ -158,6 +167,16 @@ func RespondToOffer(db *gorm.DB) gin.HandlerFunc {
 		if err := db.Save(&offer).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update offer"})
 			return
+		}
+
+		switch offer.Status {
+		case models.OfferStatusAccepted:
+			sendAPNSToUser(db, offer.BuyerID, "Offer accepted!", "The seller accepted your offer.")
+		case models.OfferStatusDeclined:
+			sendAPNSToUser(db, offer.BuyerID, "Offer declined", "The seller declined your offer.")
+		case models.OfferStatusCountered:
+			sendAPNSToUser(db, offer.BuyerID, "Counter offer received",
+				fmt.Sprintf("The seller countered with %s", formatPrice(*offer.CounterAmount)))
 		}
 		c.JSON(http.StatusOK, offer)
 	}

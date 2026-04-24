@@ -58,6 +58,8 @@ func SendMessage(db *gorm.DB) gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send message"})
 			return
 		}
+
+		sendAPNSToUser(db, msg.ReceiverID, "New message", msg.Content)
 		c.JSON(http.StatusCreated, msg)
 	}
 }

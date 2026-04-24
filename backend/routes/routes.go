@@ -56,6 +56,9 @@ func Setup(r *gin.Engine, db *gorm.DB) {
 		api.DELETE("/users/:id/block", handlers.UnblockUser(db))
 		api.GET("/blocks", handlers.GetBlockedUsers(db))
 
+		api.POST("/devices", handlers.RegisterDevice(db))
+		api.DELETE("/devices", handlers.UnregisterDevice(db))
+
 		api.POST("/offers", handlers.CreateOffer(db))
 		api.GET("/offers/my", handlers.GetMyOffers(db))
 		api.GET("/products/:id/offers", handlers.GetListingOffers(db))

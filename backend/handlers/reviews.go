@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -44,6 +45,8 @@ func AddReview(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
+		sendAPNSToUser(db, review.SellerID, "New review",
+			fmt.Sprintf("Someone left you a %d-star review.", review.Rating))
 		c.JSON(http.StatusCreated, review)
 	}
 }
