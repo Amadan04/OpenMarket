@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"math"
 	"net/http"
 	"strconv"
@@ -274,12 +275,30 @@ func MarkAsSold(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		if err := db.Model(&listing).Update("is_sold", true).Error; err != nil {
+		var body struct {
+			BuyerID *uint `json:"buyer_id"`
+		}
+		_ = c.ShouldBindJSON(&body) // optional — don't fail if absent
+
+		updates := map[string]interface{}{"is_sold": true}
+		if body.BuyerID != nil && *body.BuyerID != userID {
+			updates["buyer_id"] = *body.BuyerID
+		}
+
+		if err := db.Model(&listing).Updates(updates).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to mark as sold"})
 			return
 		}
 
 		listing.IsSold = true
+		listing.BuyerID = body.BuyerID
+
+		if body.BuyerID != nil {
+			sendAPNSToUser(db, *body.BuyerID,
+				"How was your purchase?",
+				fmt.Sprintf("You bought \"%s\" — leave a review for the seller!", listing.Title))
+		}
+
 		c.JSON(http.StatusOK, listing)
 	}
 }

@@ -40,8 +40,16 @@ struct ProductService {
         return try await APIClient.shared.request("\(Constants.Endpoints.products)/\(id)", method: "PUT", body: body)
     }
 
-    static func markAsSold(id: Int) async throws -> Product {
-        return try await APIClient.shared.request("\(Constants.Endpoints.products)/\(id)/sold", method: "PATCH")
+    static func markAsSold(id: Int, buyerID: Int? = nil) async throws -> Product {
+        struct Body: Encodable {
+            let buyerID: Int?
+            enum CodingKeys: String, CodingKey { case buyerID = "buyer_id" }
+        }
+        return try await APIClient.shared.request(
+            "\(Constants.Endpoints.products)/\(id)/sold",
+            method: "PATCH",
+            body: Body(buyerID: buyerID)
+        )
     }
 
     static func delete(id: Int) async throws {

@@ -4,7 +4,7 @@ struct MyListingsView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
     @StateObject private var viewModel = ProfileViewModel()
     @State private var selectedTab = "Active"
-    @State private var markingID: Int? = nil
+    @State private var soldSheetProduct: Product? = nil
     @Environment(\.dismiss) private var dismiss
 
     private let tabs = ["Active", "Sold", "Drafts"]
@@ -120,6 +120,15 @@ struct MyListingsView: View {
             }
         }
         .navigationBarHidden(true)
+        .sheet(item: $soldSheetProduct) { product in
+            SoldConfirmationSheet(product: product) { updated in
+                if let idx = viewModel.myListings.firstIndex(where: { $0.id == updated.id }) {
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                        viewModel.myListings[idx] = updated
+                    }
+                }
+            }
+        }
         .navigationDestination(item: $navigateTo) { product in
             EditListingView(product: product, onDelete: {
                 withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
@@ -202,15 +211,11 @@ struct MyListingsView: View {
                     }
 
                     Button {
-                        Task { await markSold(product) }
+                        soldSheetProduct = product
                     } label: {
-                        if markingID == product.id {
-                            ProgressView().scaleEffect(0.7).frame(width: 32, height: 32)
-                        } else {
-                            Image(systemName: "checkmark.circle")
-                                .font(.system(size: 22))
-                                .foregroundStyle(Color.omAccent)
-                        }
+                        Image(systemName: "checkmark.circle")
+                            .font(.system(size: 22))
+                            .foregroundStyle(Color.omAccent)
                     }
                     .buttonStyle(.plain)
                 }
@@ -227,16 +232,4 @@ struct MyListingsView: View {
 
     @State private var navigateTo: Product? = nil
 
-    private func markSold(_ product: Product) async {
-        markingID = product.id
-        do {
-            let updated = try await ProductService.markAsSold(id: product.id)
-            if let idx = viewModel.myListings.firstIndex(where: { $0.id == product.id }) {
-                withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                    viewModel.myListings[idx] = updated
-                }
-            }
-        } catch {}
-        markingID = nil
-    }
 }

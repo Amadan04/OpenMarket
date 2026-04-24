@@ -14,6 +14,7 @@ struct Product: Codable, Identifiable {
     var viewCount: Int
     var isSold: Bool
     let userID: Int
+    var buyerID: Int?
     let createdAt: Date
 
     enum CodingKeys: String, CodingKey {
@@ -22,6 +23,7 @@ struct Product: Codable, Identifiable {
         case viewCount = "view_count"
         case isSold    = "is_sold"
         case userID    = "user_id"
+        case buyerID   = "buyer_id"
         case createdAt = "created_at"
     }
 }

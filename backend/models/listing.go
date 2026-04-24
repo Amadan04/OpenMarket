@@ -56,5 +56,6 @@ type Listing struct {
 	ViewCount   int         `gorm:"default:0" json:"view_count"`
 	IsSold      bool        `gorm:"default:false" json:"is_sold"`
 	UserID      uint        `gorm:"index;not null" json:"user_id"`
+	BuyerID     *uint       `gorm:"index" json:"buyer_id,omitempty"`
 	CreatedAt   time.Time   `json:"created_at"`
 }
