@@ -1,10 +1,12 @@
 package handlers
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
 	"strings"
 
+	"openmarket/hub"
 	"openmarket/models"
 
 	"github.com/gin-gonic/gin"
@@ -17,7 +19,7 @@ type conversationSummary struct {
 	LastMessage models.Message `json:"last_message"`
 }
 
-func SendMessage(db *gorm.DB) gin.HandlerFunc {
+func SendMessage(db *gorm.DB, h *hub.Hub) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var msg models.Message
 		if err := c.ShouldBindJSON(&msg); err != nil {
@@ -59,7 +61,12 @@ func SendMessage(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		sendAPNSToUser(db, msg.ReceiverID, "New message", msg.Content)
+		// Push over WebSocket if receiver is connected; fall back to APNs.
+		if payload, err := json.Marshal(map[string]any{"type": "message", "data": msg}); err == nil {
+			if !h.Send(msg.ReceiverID, string(payload)) {
+				sendAPNSToUser(db, msg.ReceiverID, "New message", msg.Content)
+			}
+		}
 		c.JSON(http.StatusCreated, msg)
 	}
 }

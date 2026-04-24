@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"openmarket/database"
+	"openmarket/hub"
 	"openmarket/models"
 	"openmarket/routes"
 
@@ -28,9 +29,11 @@ func main() {
 		&models.DeviceToken{},
 	)
 
+	h := hub.New()
+
 	r := gin.Default()
 	r.Static("/uploads", "./uploads")
-	routes.Setup(r, database.DB)
+	routes.Setup(r, database.DB, h)
 
 	port := os.Getenv("PORT")
 	if port == "" {

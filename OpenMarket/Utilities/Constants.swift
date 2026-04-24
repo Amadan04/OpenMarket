@@ -2,7 +2,8 @@ import Foundation
 import Combine
 
 enum Constants {
-    static let baseURL = "http://localhost:8080"
+    static let baseURL  = "http://localhost:8080"
+    static let wsURL    = "ws://localhost:8080/ws"
 
     enum Endpoints {
         static let register       = "/auth/register"

@@ -2,13 +2,14 @@ package routes
 
 import (
 	"openmarket/handlers"
+	"openmarket/hub"
 	"openmarket/middleware"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
-func Setup(r *gin.Engine, db *gorm.DB) {
+func Setup(r *gin.Engine, db *gorm.DB, h *hub.Hub) {
 	auth := r.Group("/auth")
 	{
 		auth.POST("/register", handlers.Register(db))
@@ -19,6 +20,9 @@ func Setup(r *gin.Engine, db *gorm.DB) {
 	{
 		authProtected.GET("/me", handlers.Me(db))
 	}
+
+	// WebSocket — auth via ?token= query param (not middleware).
+	r.GET("/ws", handlers.WSHandler(h))
 
 	api := r.Group("/")
 	api.Use(middleware.AuthMiddleware())
@@ -65,7 +69,7 @@ func Setup(r *gin.Engine, db *gorm.DB) {
 		api.PATCH("/offers/:id", handlers.RespondToOffer(db))
 		api.DELETE("/offers/:id", handlers.WithdrawOffer(db))
 
-		api.POST("/messages", handlers.SendMessage(db))
+		api.POST("/messages", handlers.SendMessage(db, h))
 		api.DELETE("/messages/:id", handlers.DeleteMessage(db))
 		api.GET("/conversations", handlers.GetConversations(db))
 		api.GET("/conversations/:id/messages", handlers.GetConversationMessages(db))
