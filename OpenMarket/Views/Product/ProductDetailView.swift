@@ -10,6 +10,7 @@ struct ProductDetailView: View {
     @State private var showReport = false
     @State private var showRateSeller = false
     @State private var showSellerProfile = false
+    @State private var showGallery = false
     @State private var imageIndex = 0
 
     init(product: Product) {
@@ -132,6 +133,9 @@ struct ProductDetailView: View {
         .sheet(isPresented: $showReport) {
             ReportListingView(productID: viewModel.product.id, productTitle: viewModel.product.title)
         }
+        .fullScreenCover(isPresented: $showGallery) {
+            ImageGalleryView(images: viewModel.product.images, currentIndex: $imageIndex)
+        }
         .sheet(isPresented: $showRateSeller) {
             RateSellerView(sellerID: viewModel.product.userID, sellerName: "Seller", product: viewModel.product)
         }
@@ -160,6 +164,7 @@ struct ProductDetailView: View {
                         .frame(height: 380)
                         .clipped()
                         .tag(idx)
+                        .onTapGesture { showGallery = true }
                     }
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
