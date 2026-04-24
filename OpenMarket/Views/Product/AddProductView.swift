@@ -12,12 +12,24 @@ struct AddProductView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack {
+            ZStack(alignment: .top) {
                 Color.omBg.ignoresSafeArea()
                 VStack(spacing: 0) {
                     addHeader
                     stepContent
                     addFooter
+                }
+                if viewModel.draftSaved {
+                    Text("Draft saved")
+                        .font(.inter(14, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, Spacing.l)
+                        .padding(.vertical, Spacing.s)
+                        .background(Color.omAccent)
+                        .clipShape(Capsule())
+                        .padding(.top, Spacing.xl)
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: viewModel.draftSaved)
                 }
             }
             .navigationBarHidden(true)
@@ -45,7 +57,7 @@ struct AddProductView: View {
                     .font(.omMicro)
                     .foregroundStyle(Color.omTextMuted)
                 Spacer()
-                Button("Save draft") {}
+                Button("Save draft") { viewModel.saveDraft() }
                     .font(.inter(14, weight: .semibold))
                     .foregroundStyle(Color.omTextMuted)
             }

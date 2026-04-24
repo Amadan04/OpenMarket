@@ -51,6 +51,11 @@ func AddReview(db *gorm.DB) gin.HandlerFunc {
 	}
 }
 
+type ReviewWithName struct {
+	models.Review
+	ReviewerName string `json:"reviewer_name"`
+}
+
 func GetSellerReviews(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		sellerID, err := strconv.Atoi(c.Param("id"))
@@ -65,20 +70,37 @@ func GetSellerReviews(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
+		// Collect unique reviewer IDs and fetch their names in one query
+		idSet := map[uint]struct{}{}
+		for _, r := range reviews {
+			idSet[r.ReviewerID] = struct{}{}
+		}
+		ids := make([]uint, 0, len(idSet))
+		for id := range idSet {
+			ids = append(ids, id)
+		}
+		var users []models.User
+		db.Where("id IN ?", ids).Find(&users)
+		nameMap := map[uint]string{}
+		for _, u := range users {
+			nameMap[u.ID] = u.Name
+		}
+
+		enriched := make([]ReviewWithName, len(reviews))
 		var average float64
+		for i, r := range reviews {
+			enriched[i] = ReviewWithName{Review: r, ReviewerName: nameMap[r.ReviewerID]}
+			average += float64(r.Rating)
+		}
 		if len(reviews) > 0 {
-			total := 0
-			for _, review := range reviews {
-				total += review.Rating
-			}
-			average = float64(total) / float64(len(reviews))
+			average /= float64(len(reviews))
 		}
 
 		c.JSON(http.StatusOK, gin.H{
 			"seller_id":      sellerID,
 			"average_rating": average,
 			"reviews_count":  len(reviews),
-			"reviews":        reviews,
+			"reviews":        enriched,
 		})
 	}
 }

@@ -18,6 +18,11 @@ final class AddProductViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var didSubmit = false
+    @Published var draftSaved = false
+
+    private let draftKey = "add_product_draft_v1"
+
+    init() { loadDraft() }
 
     var isValid: Bool {
         !title.isEmpty && !price.isEmpty && Double(price) != nil
@@ -60,9 +65,33 @@ final class AddProductViewModel: ObservableObject {
         }
     }
 
+    func saveDraft() {
+        let draft: [String: Any] = [
+            "title": title, "description": description, "price": price,
+            "category": category, "condition": condition, "location": location,
+            "latitude": latitude, "longitude": longitude
+        ]
+        UserDefaults.standard.set(draft, forKey: draftKey)
+        draftSaved = true
+        Task { try? await Task.sleep(nanoseconds: 2_000_000_000); draftSaved = false }
+    }
+
     func reset() {
         title = ""; description = ""; price = ""; category = "Other"
-        location = ""; images = []; imageURLs = []; latitude = 0; longitude = 0
-        didSubmit = false; errorMessage = nil
+        condition = "Good"; location = ""; images = []; imageURLs = []
+        latitude = 0; longitude = 0; didSubmit = false; errorMessage = nil
+        UserDefaults.standard.removeObject(forKey: draftKey)
+    }
+
+    private func loadDraft() {
+        guard let draft = UserDefaults.standard.dictionary(forKey: draftKey) else { return }
+        title       = draft["title"]       as? String ?? ""
+        description = draft["description"] as? String ?? ""
+        price       = draft["price"]       as? String ?? ""
+        category    = draft["category"]    as? String ?? "Other"
+        condition   = draft["condition"]   as? String ?? "Good"
+        location    = draft["location"]    as? String ?? ""
+        latitude    = draft["latitude"]    as? Double ?? 0
+        longitude   = draft["longitude"]  as? Double ?? 0
     }
 }

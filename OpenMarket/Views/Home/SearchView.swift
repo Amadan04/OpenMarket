@@ -3,10 +3,10 @@ import SwiftUI
 struct SearchView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel = ProductListViewModel()
+    @ObservedObject private var historyStore = SearchHistoryStore.shared
     @State private var query = ""
     @FocusState private var focused: Bool
 
-    private let recents = ["Leica", "oak desk", "road bike", "Eames"]
     private let trending = ["Vintage camera", "Mid-century furniture", "Bikes under $500", "Plants", "Records"]
 
     var body: some View {
@@ -68,9 +68,11 @@ struct SearchView: View {
                     // Browse state
                     ScrollView {
                         VStack(alignment: .leading, spacing: 0) {
-                            sectionHeader("Recent")
-                            ForEach(recents, id: \.self) { term in
-                                recentRow(term)
+                            if !historyStore.terms.isEmpty {
+                                sectionHeader("Recent")
+                                ForEach(historyStore.terms, id: \.self) { term in
+                                    recentRow(term)
+                                }
                             }
 
                             sectionHeader("Trending nearby").padding(.top, Spacing.xxl)
@@ -96,7 +98,10 @@ struct SearchView: View {
     }
 
     private func search() async {
-        viewModel.searchText = query
+        let trimmed = query.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty else { return }
+        SearchHistoryStore.shared.record(trimmed)
+        viewModel.searchText = trimmed
         await viewModel.applyFilters()
     }
 
@@ -117,11 +122,16 @@ struct SearchView: View {
                     .clipShape(Circle())
                 Text(term).font(.omCallout).foregroundStyle(Color.omText)
                 Spacer()
-                Button { } label: {
+                Button { SearchHistoryStore.shared.remove(term) } label: {
                     Image(systemName: "xmark").font(.system(size: 13)).foregroundStyle(Color.omTextSubtle)
                 }
             }
             .padding(.vertical, Spacing.m)
+            .contentShape(Rectangle())
+            .onTapGesture {
+                query = term
+                Task { await search() }
+            }
             Divider()
         }
     }

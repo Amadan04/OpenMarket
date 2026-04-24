@@ -257,9 +257,10 @@ struct SellerProfileView: View {
     private func reviewItem(_ review: Review) -> some View {
         VStack(alignment: .leading, spacing: Spacing.m) {
             HStack {
-                AvatarView(initial: "U", size: 36)
+                AvatarView(initial: review.reviewerName.prefix(1).description, size: 36)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("User #\(review.reviewerID)").font(.inter(14, weight: .semibold)).foregroundStyle(Color.omText)
+                    Text(review.reviewerName.isEmpty ? "Anonymous" : review.reviewerName)
+                        .font(.inter(14, weight: .semibold)).foregroundStyle(Color.omText)
                     StarRatingView(rating: Double(review.rating), size: 11)
                 }
                 Spacer()

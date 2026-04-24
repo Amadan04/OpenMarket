@@ -136,7 +136,7 @@ struct HomeView: View {
                         HStack {
                             Text("Recently Added").font(.inter(17, weight: .bold)).foregroundStyle(Color.omText)
                             Spacer()
-                            NavigationLink("See map") { }
+                            NavigationLink("See map") { MapView() }
                                 .font(.inter(13, weight: .semibold))
                                 .foregroundStyle(Color.omAccent)
                         }

@@ -6,13 +6,15 @@ struct Review: Codable, Identifiable {
     let comment: String
     let sellerID: Int
     let reviewerID: Int
+    let reviewerName: String
     let createdAt: Date
 
     enum CodingKeys: String, CodingKey {
         case id, rating, comment
-        case sellerID   = "seller_id"
-        case reviewerID = "reviewer_id"
-        case createdAt  = "created_at"
+        case sellerID    = "seller_id"
+        case reviewerID  = "reviewer_id"
+        case reviewerName = "reviewer_name"
+        case createdAt   = "created_at"
     }
 }
 
