@@ -10,11 +10,24 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const maxUploadSize = 10 << 20 // 10 MB
+
 func UploadImage() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, maxUploadSize)
+
 		file, err := c.FormFile("image")
 		if err != nil {
+			if err.Error() == "http: request body too large" {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "file too large (max 10 MB)"})
+				return
+			}
 			c.JSON(http.StatusBadRequest, gin.H{"error": "image file is required"})
+			return
+		}
+
+		if file.Size > maxUploadSize {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "file too large (max 10 MB)"})
 			return
 		}
 

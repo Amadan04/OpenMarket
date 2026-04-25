@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -12,6 +13,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
+
+var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
 
 type authPayload struct {
 	Name     string `json:"name"`
@@ -37,6 +40,10 @@ func Register(db *gorm.DB) gin.HandlerFunc {
 		}
 		if input.Name == "" || input.Email == "" || len(input.Password) < 8 {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "email and password (min 8 chars) are required; name is recommended"})
+			return
+		}
+		if !emailRegex.MatchString(input.Email) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid email address"})
 			return
 		}
 

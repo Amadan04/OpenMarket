@@ -172,6 +172,11 @@ func RespondToOffer(db *gorm.DB) gin.HandlerFunc {
 				"is_sold":  true,
 				"buyer_id": offer.BuyerID,
 			})
+			// Cancel all other pending/countered offers on this listing
+			db.Model(&models.Offer{}).
+				Where("listing_id = ? AND id != ? AND status IN ?",
+					offer.ListingID, offer.ID, []string{"pending", "countered"}).
+				Update("status", models.OfferStatusDeclined)
 			db.Create(&models.Message{
 				SenderID:   offer.SellerID,
 				ReceiverID: offer.BuyerID,
@@ -250,6 +255,11 @@ func BuyerRespondToOffer(db *gorm.DB) gin.HandlerFunc {
 				"is_sold":  true,
 				"buyer_id": offer.BuyerID,
 			})
+			// Cancel all other pending/countered offers on this listing
+			db.Model(&models.Offer{}).
+				Where("listing_id = ? AND id != ? AND status IN ?",
+					offer.ListingID, offer.ID, []string{"pending", "countered"}).
+				Update("status", models.OfferStatusDeclined)
 			db.Create(&models.Message{
 				SenderID:   offer.BuyerID,
 				ReceiverID: offer.SellerID,
