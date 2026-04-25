@@ -3,6 +3,7 @@ import SwiftUI
 struct ChatView: View {
     @ObservedObject var viewModel: ChatViewModel
     let otherUser: User
+    var product: Product? = nil
     @State private var messageText = ""
     @Environment(\.dismiss) private var dismiss
     @FocusState private var composerFocused: Bool
@@ -14,7 +15,7 @@ struct ChatView: View {
             Color.omBg.ignoresSafeArea()
             VStack(spacing: 0) {
                 navBar
-                pinnedProduct
+                if product != nil { pinnedProduct }
                 messageList
                 composer
             }
@@ -58,17 +59,25 @@ struct ChatView: View {
         .overlay(alignment: .bottom) { Color.omBorder.frame(height: 0.5) }
     }
 
-    // MARK: - Pinned product (placeholder)
+    // MARK: - Pinned product
     private var pinnedProduct: some View {
         HStack(spacing: Spacing.m) {
-            RoundedRectangle(cornerRadius: Radius.sm)
-                .fill(Color.cream200)
-                .frame(width: 44, height: 44)
-                .overlay(Image(systemName: "photo").foregroundStyle(Color.stone300))
+            AsyncImage(url: URL(string: product?.images.first ?? "")) { phase in
+                switch phase {
+                case .success(let img): img.resizable().scaledToFill()
+                default: Rectangle().fill(Color.cream200)
+                        .overlay(Image(systemName: "photo").foregroundStyle(Color.stone300))
+                }
+            }
+            .frame(width: 44, height: 44)
+            .clipShape(RoundedRectangle(cornerRadius: Radius.sm))
 
             VStack(alignment: .leading, spacing: 2) {
-                Text("Listing").font(.inter(13, weight: .semibold)).foregroundStyle(Color.omText).lineLimit(1)
-                Text("View item").font(.inter(13, weight: .bold)).foregroundStyle(Color.omAccent)
+                Text(product?.title ?? "").font(.inter(13, weight: .semibold)).foregroundStyle(Color.omText).lineLimit(1)
+                if let price = product?.price {
+                    Text(price.formatted(.currency(code: "USD").precision(.fractionLength(0))))
+                        .font(.inter(13, weight: .bold)).foregroundStyle(Color.omAccent)
+                }
             }
             Spacer()
             Image(systemName: "chevron.right").font(.system(size: 13)).foregroundStyle(Color.omTextMuted)

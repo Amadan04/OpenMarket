@@ -119,7 +119,7 @@ struct ProductDetailView: View {
             if authViewModel.currentUser != nil {
                 let vm = ChatViewModel()
                 let other = User(id: viewModel.product.userID, name: viewModel.sellerName, email: "", createdAt: Date())
-                ChatView(viewModel: vm, otherUser: other)
+                ChatView(viewModel: vm, otherUser: other, product: viewModel.product)
                     .task { await vm.openChat(with: viewModel.product.userID) }
             }
         }

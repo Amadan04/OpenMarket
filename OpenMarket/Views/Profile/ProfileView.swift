@@ -29,14 +29,16 @@ struct ProfileView: View {
                                     .foregroundStyle(Color.omText)
                                 HStack(spacing: 4) {
                                     Image(systemName: "star.fill").font(.system(size: 11)).foregroundStyle(Color.omAccent)
-                                    Text("4.8 · \(viewModel.myListings.count) listings · Member")
+                                    Text("\(String(format: "%.1f", viewModel.myReviews?.averageRating ?? 0)) · \(viewModel.myListings.count) listings")
                                         .font(.inter(12))
                                         .foregroundStyle(Color.omTextMuted)
                                 }
-                                Button("View public profile →") {}
-                                    .font(.inter(13, weight: .semibold))
-                                    .foregroundStyle(Color.omAccent)
-                                    .padding(.top, 2)
+                                NavigationLink(destination: SellerProfileView(sellerID: authViewModel.currentUser?.id ?? 0)) {
+                                    Text("View public profile →")
+                                        .font(.inter(13, weight: .semibold))
+                                        .foregroundStyle(Color.omAccent)
+                                }
+                                .padding(.top, 2)
                             }
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)

@@ -94,13 +94,7 @@ struct ConversationsView: View {
 
     private func conversationRow(_ conv: Conversation) -> some View {
         HStack(spacing: Spacing.m) {
-            ZStack(alignment: .topTrailing) {
-                AvatarView(initial: conv.participant.name.prefix(1).description, size: 52, tone: .clay)
-                // Unread indicator (placeholder)
-                Circle().fill(Color.omAccent)
-                    .frame(width: 10, height: 10)
-                    .overlay(Circle().stroke(Color.omBg, lineWidth: 2))
-            }
+            AvatarView(initial: conv.participant.name.prefix(1).description, size: 52, tone: .clay)
 
             VStack(alignment: .leading, spacing: 2) {
                 HStack {

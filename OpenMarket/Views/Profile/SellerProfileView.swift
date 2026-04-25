@@ -10,6 +10,8 @@ struct SellerProfileView: View {
     @State private var showBlockConfirm = false
     @State private var isBlocked = false
     @State private var isTogglingBlock = false
+    @State private var sellerName = "Seller"
+    @State private var sellerJoinedDate: Date? = nil
 
     var body: some View {
         ZStack {
@@ -70,19 +72,21 @@ struct SellerProfileView: View {
                     // Profile header
                     VStack(spacing: Spacing.m) {
                         ZStack(alignment: .bottomTrailing) {
-                            AvatarView(initial: "S", size: 96, tone: .sage)
+                            AvatarView(initial: sellerName.prefix(1).description, size: 96, tone: .sage)
                             Image(systemName: "checkmark.seal.fill")
                                 .font(.system(size: 20))
                                 .foregroundStyle(Color.sage500)
                                 .background(Circle().fill(.white).padding(-2))
                         }
 
-                        Text("Seller")
+                        Text(sellerName)
                             .font(.serif(28))
                             .foregroundStyle(Color.omText)
-                        Text("Joined recently")
-                            .font(.inter(13))
-                            .foregroundStyle(Color.omTextMuted)
+                        if let date = sellerJoinedDate {
+                            Text("Joined \(date.formatted(.dateTime.month(.wide).year()))")
+                                .font(.inter(13))
+                                .foregroundStyle(Color.omTextMuted)
+                        }
                     }
                     .padding(.top, Spacing.l)
 
@@ -172,13 +176,14 @@ struct SellerProfileView: View {
         .task {
             async let listings: () = viewModel.loadMyListings(userID: sellerID)
             async let reviews: () = viewModel.loadMyReviews(userID: sellerID)
+            async let info: () = loadSellerInfo()
             let blocked = await BlockService.isBlocked(userID: sellerID)
-            _ = await (listings, reviews)
+            _ = await (listings, reviews, info)
             isBlocked = blocked
         }
         .sheet(isPresented: $showChat) {
             let vm = ChatViewModel()
-            let other = User(id: sellerID, name: "Seller", email: "", createdAt: Date())
+            let other = User(id: sellerID, name: sellerName, email: "", createdAt: Date())
             ChatView(viewModel: vm, otherUser: other)
                 .task { await vm.openChat(with: sellerID) }
         }
@@ -275,11 +280,32 @@ struct SellerProfileView: View {
 
     private var aboutTab: some View {
         VStack(alignment: .leading, spacing: Spacing.m) {
-            Text("Member since recently")
-                .font(.omBody).foregroundStyle(Color.omTextMuted)
+            if let date = sellerJoinedDate {
+                Text("Member since \(date.formatted(.dateTime.month(.wide).year()))")
+                    .font(.omBody).foregroundStyle(Color.omTextMuted)
+            } else {
+                Text("Member")
+                    .font(.omBody).foregroundStyle(Color.omTextMuted)
+            }
         }
         .padding(.horizontal, Spacing.xl)
         .padding(.top, Spacing.l)
+    }
+
+    private func loadSellerInfo() async {
+        struct SellerInfo: Decodable {
+            let name: String
+            let createdAt: Date
+            enum CodingKeys: String, CodingKey {
+                case name
+                case createdAt = "created_at"
+            }
+        }
+        do {
+            let info: SellerInfo = try await APIClient.shared.request("/users/\(sellerID)")
+            sellerName = info.name
+            sellerJoinedDate = info.createdAt
+        } catch {}
     }
 
     private func toggleBlock() async {
