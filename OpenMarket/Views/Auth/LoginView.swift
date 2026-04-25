@@ -86,9 +86,7 @@ struct LoginView: View {
     }
 
     private var forgotPasswordSheet: some View {
-        ZStack {
-            Color.omBg.ignoresSafeArea()
-            VStack(spacing: 0) {
+        VStack(spacing: 0) {
                 HStack {
                     Spacer()
                     Button { showForgotPassword = false } label: {
@@ -132,7 +130,7 @@ struct LoginView: View {
             }
             .padding(.horizontal, Spacing.xxl)
             .padding(.top, Spacing.l)
-        }
+        .presentationBackground(Color.omBg)
         .presentationDetents([.medium])
     }
 }

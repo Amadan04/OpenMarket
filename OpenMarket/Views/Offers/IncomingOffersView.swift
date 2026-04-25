@@ -265,9 +265,7 @@ struct IncomingOffersView: View {
     }
 
     private var counterSheet: some View {
-        ZStack {
-            Color.omBg.ignoresSafeArea()
-            VStack(spacing: 0) {
+        VStack(spacing: 0) {
                 RoundedRectangle(cornerRadius: 3)
                     .fill(Color.omBorderStrong)
                     .frame(width: 40, height: 5)
@@ -325,8 +323,8 @@ struct IncomingOffersView: View {
                 .disabled(Double(counterText) == nil || Double(counterText) ?? 0 <= 0)
                 .padding(.horizontal, Spacing.xl)
                 .padding(.bottom, Spacing.x4)
-            }
         }
+        .presentationBackground(Color.omBg)
         .presentationDetents([.medium])
     }
 }

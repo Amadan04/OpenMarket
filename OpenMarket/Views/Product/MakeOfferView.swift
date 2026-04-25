@@ -17,9 +17,7 @@ struct MakeOfferView: View {
     }
 
     var body: some View {
-        ZStack {
-            Color.omBg.ignoresSafeArea()
-            VStack(spacing: 0) {
+        VStack(spacing: 0) {
                 RoundedRectangle(cornerRadius: 3)
                     .fill(Color.omBorderStrong)
                     .frame(width: 40, height: 5)
@@ -156,9 +154,9 @@ struct MakeOfferView: View {
                 .padding(.vertical, Spacing.m)
                 .background(Color.omBg)
                 .overlay(alignment: .top) { Color.omBorder.frame(height: 0.5) }
-            }
         }
-        .presentationDetents([.medium, .large])
+        .presentationBackground(Color.omBg)
+        .presentationDetents([.large])
         .onAppear { offerFocused = true }
     }
 

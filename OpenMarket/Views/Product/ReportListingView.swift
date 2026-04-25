@@ -20,9 +20,7 @@ struct ReportListingView: View {
     ]
 
     var body: some View {
-        ZStack {
-            Color.omBg.ignoresSafeArea()
-            VStack(spacing: 0) {
+        VStack(spacing: 0) {
                 // Handle
                 RoundedRectangle(cornerRadius: 3)
                     .fill(Color.omBorderStrong)
@@ -125,8 +123,8 @@ struct ReportListingView: View {
                     .background(Color.omBg)
                     .overlay(alignment: .top) { Color.omBorder.frame(height: 0.5) }
                 }
-            }
         }
+        .presentationBackground(Color.omBg)
         .animation(.spring(response: 0.4), value: submitted)
         .presentationDetents([.large])
     }
