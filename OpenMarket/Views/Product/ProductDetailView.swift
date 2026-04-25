@@ -70,14 +70,14 @@ struct ProductDetailView: View {
                                             showOffer = true
                                         }
                                     }
-                                    OMButton(label: "Message", size: .lg, icon: "bubble.left.fill", fullWidth: viewModel.myOffer != nil) {
+                                    OMButton(label: "Message", size: .lg, fullWidth: viewModel.myOffer != nil, icon: "bubble.left.fill") {
                                         showChat = true
                                     }
                                 }
                             }
                             .padding(.top, Spacing.l)
                         } else {
-                            OMButton(label: "Message buyer", size: .lg, icon: "bubble.left.fill", fullWidth: true) {
+                            OMButton(label: "Message buyer", size: .lg, fullWidth: true,  icon: "bubble.left.fill") {
                                 showChat = true
                             }
                             .padding(.top, Spacing.l)
@@ -481,7 +481,7 @@ struct ProductDetailView: View {
             Spacer()
 
             VStack(spacing: Spacing.m) {
-                OMButton(label: "Message Seller", size: .lg, icon: "bubble.left.fill", fullWidth: true) {
+                OMButton(label: "Message Seller", size: .lg, fullWidth: true, icon: "bubble.left.fill") {
                     showAccepted = false
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                         showChat = true
