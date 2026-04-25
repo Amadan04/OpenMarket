@@ -13,9 +13,7 @@ struct SoldConfirmationSheet: View {
     @State private var soldProduct: Product? = nil
 
     var body: some View {
-        ZStack {
-            Color.omBg.ignoresSafeArea()
-            VStack(spacing: 0) {
+        VStack(spacing: 0) {
                 // Handle
                 RoundedRectangle(cornerRadius: 3)
                     .fill(Color.omBorderStrong)
@@ -137,9 +135,9 @@ struct SoldConfirmationSheet: View {
                 .padding(.vertical, Spacing.m)
                 .background(Color.omBg)
                 .overlay(alignment: .top) { Color.omBorder.frame(height: 0.5) }
-            }
         }
-        .presentationDetents([.medium, .large])
+        .presentationBackground(Color.omBg)
+        .presentationDetents([.large])
         .task { await loadConversations() }
         .sheet(isPresented: $showReviewPrompt) {
             if let p = soldProduct, let buyerID = p.buyerID {
