@@ -47,6 +47,40 @@ struct ProductDetailView: View {
                             .kerning(-0.3)
                             .padding(.top, Spacing.m)
 
+                        // Action buttons
+                        if viewModel.product.isSold {
+                            Text("SOLD")
+                                .font(.inter(15, weight: .bold))
+                                .foregroundStyle(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, Spacing.m)
+                                .background(Color.omTextMuted)
+                                .clipShape(RoundedRectangle(cornerRadius: Radius.lg))
+                                .padding(.top, Spacing.l)
+                        } else if authViewModel.currentUser?.id != viewModel.product.userID {
+                            VStack(spacing: Spacing.s) {
+                                if let offer = viewModel.myOffer {
+                                    offerStatusBanner(offer)
+                                }
+                                HStack(spacing: Spacing.m) {
+                                    if viewModel.myOffer == nil {
+                                        OMButton(label: "Make Offer", variant: .secondary, size: .lg, icon: "tag.fill") {
+                                            showOffer = true
+                                        }
+                                    }
+                                    OMButton(label: "Message", size: .lg, icon: "bubble.left.fill", fullWidth: viewModel.myOffer != nil) {
+                                        showChat = true
+                                    }
+                                }
+                            }
+                            .padding(.top, Spacing.l)
+                        } else {
+                            OMButton(label: "Message buyer", size: .lg, icon: "bubble.left.fill", fullWidth: true) {
+                                showChat = true
+                            }
+                            .padding(.top, Spacing.l)
+                        }
+
                         // Meta row
                         HStack(spacing: Spacing.xl) {
                             metaItem(title: "Location", value: viewModel.product.location.isEmpty ? "N/A" : viewModel.product.location)
@@ -104,9 +138,6 @@ struct ProductDetailView: View {
             }
         }
         .ignoresSafeArea(edges: .top)
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            stickyBar
-        }
         .navigationBarHidden(true)
         .task {
             RecentlyViewedStore.shared.record(viewModel.product)
@@ -313,55 +344,6 @@ struct ProductDetailView: View {
                 Divider()
             }
         }
-    }
-
-    private var stickyBar: some View {
-        VStack(spacing: 0) {
-            // Offer status banner shown above buttons when an offer exists
-            if let offer = viewModel.myOffer,
-               authViewModel.currentUser?.id != viewModel.product.userID {
-                offerStatusBanner(offer)
-                    .padding(.horizontal, Spacing.xl)
-                    .padding(.top, Spacing.m)
-            }
-
-            HStack(spacing: Spacing.m) {
-                Button { Task { await viewModel.toggleFavorite() } } label: {
-                    Image(systemName: viewModel.isFavorited ? "heart.fill" : "heart")
-                        .font(.system(size: 22))
-                        .foregroundStyle(viewModel.isFavorited ? Color.omAccent : Color.omText)
-                        .frame(width: 56, height: 56)
-                        .background(Color.omBgElevated)
-                        .clipShape(Circle())
-                        .overlay(Circle().stroke(Color.omBorderStrong, lineWidth: 1))
-                }
-
-                if authViewModel.currentUser?.id == viewModel.product.userID {
-                    OMButton(label: "Message", size: .lg, fullWidth: true, icon: "bubble.left.fill") {
-                        showChat = true
-                    }
-                } else if viewModel.myOffer == nil {
-                    OMButton(label: "Make Offer", variant: .secondary, size: .lg, icon: "tag.fill") {
-                        showOffer = true
-                    }
-                    OMButton(label: "Message", size: .lg, icon: "bubble.left.fill") {
-                        showChat = true
-                    }
-                } else {
-                    OMButton(label: "Message", size: .lg, fullWidth: true, icon: "bubble.left.fill") {
-                        showChat = true
-                    }
-                }
-            }
-            .padding(.horizontal, Spacing.xl)
-            .padding(.vertical, Spacing.m)
-            .padding(.bottom, Spacing.xl)
-        }
-        .background(
-            Rectangle().fill(.ultraThinMaterial)
-                .overlay(alignment: .top) { Color.omBorder.frame(height: 0.5) }
-                .ignoresSafeArea()
-        )
     }
 
     @ViewBuilder
