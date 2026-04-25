@@ -72,7 +72,7 @@ struct SectionProductsView: View {
 
     private func load() async {
         isLoading = true
-        let fetched = (try? await ProductService.getAll(sort: sort, limit: 40)) ?? []
+        let fetched = (try? await ProductService.getAll(limit: 40, sort: sort)) ?? []
         products = fetched.filter { !$0.isSold } + fetched.filter { $0.isSold }
         isLoading = false
     }

@@ -119,7 +119,7 @@ struct ProductDetailView: View {
             _ = await (reviews, offer)
         }
         .sheet(isPresented: $showChat) {
-            if let user = authViewModel.currentUser {
+            if authViewModel.currentUser != nil {
                 let vm = ChatViewModel()
                 let other = User(id: viewModel.product.userID, name: "Seller", email: "", createdAt: Date())
                 ChatView(viewModel: vm, otherUser: other)
@@ -340,7 +340,7 @@ struct ProductDetailView: View {
                 }
 
                 if authViewModel.currentUser?.id == viewModel.product.userID {
-                    OMButton(label: "Message", size: .lg, icon: "bubble.left.fill", fullWidth: true) {
+                    OMButton(label: "Message", size: .lg, fullWidth: true, icon: "bubble.left.fill") {
                         showChat = true
                     }
                 } else if viewModel.myOffer == nil {
@@ -351,7 +351,7 @@ struct ProductDetailView: View {
                         showChat = true
                     }
                 } else {
-                    OMButton(label: "Message", size: .lg, icon: "bubble.left.fill", fullWidth: true) {
+                    OMButton(label: "Message", size: .lg, fullWidth: true, icon: "bubble.left.fill") {
                         showChat = true
                     }
                 }

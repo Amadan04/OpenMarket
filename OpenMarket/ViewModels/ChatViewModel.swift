@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 // Envelope sent by the server over the WebSocket.
 private struct WSEnvelope: Decodable {

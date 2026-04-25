@@ -78,7 +78,7 @@ struct MapView: View {
                         }
                     }
                 }
-                if let loc = locationService.currentLocation {
+                if locationService.currentLocation != nil {
                     UserAnnotation()
                 }
             }
