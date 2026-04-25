@@ -14,11 +14,11 @@ struct MapView: View {
         )
     )
 
-    private let quickFilters = ["All", "Under $100", "Tech", "Furniture"]
+    private let quickFilters = ["All", "Under BHD 100", "Tech", "Furniture"]
 
     private var filteredProducts: [Product] {
         switch selectedCategory {
-        case "Under $100":
+        case "Under BHD 100":
             return products.filter { $0.price < 100 }
         case "Tech":
             return products.filter { ["Electronics", "Mobile"].contains($0.category) }

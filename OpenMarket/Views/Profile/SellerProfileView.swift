@@ -96,7 +96,7 @@ struct SellerProfileView: View {
                         Divider().frame(height: 40)
                         statItem(value: "\(viewModel.myListings.count)", label: "Listings")
                         Divider().frame(height: 40)
-                        statItem(value: "2h", label: "Replies in")
+                        statItem(value: "\(viewModel.myReviews?.reviewsCount ?? 0)", label: "Reviews")
                     }
                     .padding(Spacing.m)
                     .background(Color.omBgElevated)

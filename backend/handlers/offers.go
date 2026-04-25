@@ -12,7 +12,7 @@ import (
 )
 
 func formatPrice(amount float64) string {
-	return fmt.Sprintf("$%.0f", amount)
+	return fmt.Sprintf("BHD %.0f", amount)
 }
 
 func CreateOffer(db *gorm.DB) gin.HandlerFunc {
@@ -83,6 +83,35 @@ func GetMyOffers(db *gorm.DB) gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch offers"})
 			return
 		}
+
+		// Enrich with listing titles and seller names
+		listingIDs := make([]uint, 0, len(offers))
+		sellerIDs := make([]uint, 0, len(offers))
+		for _, o := range offers {
+			listingIDs = append(listingIDs, o.ListingID)
+			sellerIDs = append(sellerIDs, o.SellerID)
+		}
+		titleByID := make(map[uint]string)
+		if len(listingIDs) > 0 {
+			var listings []models.Listing
+			db.Select("id, title").Where("id IN ?", listingIDs).Find(&listings)
+			for _, l := range listings {
+				titleByID[l.ID] = l.Title
+			}
+		}
+		nameByID := make(map[uint]string)
+		if len(sellerIDs) > 0 {
+			var users []models.User
+			db.Select("id, name").Where("id IN ?", sellerIDs).Find(&users)
+			for _, u := range users {
+				nameByID[u.ID] = u.Name
+			}
+		}
+		for i := range offers {
+			offers[i].ListingTitle = titleByID[offers[i].ListingID]
+			offers[i].SellerName = nameByID[offers[i].SellerID]
+		}
+
 		c.JSON(http.StatusOK, offers)
 	}
 }

@@ -274,7 +274,7 @@ private struct OfferRowView: View {
     private var counterSheet: some View {
         VStack(spacing: Spacing.l) {
             Text("Counter Offer").font(.serif(24)).foregroundStyle(Color.omText)
-            TextField("Your counter amount (USD)", text: $counterText)
+            TextField("Your counter amount (BHD)", text: $counterText)
                 .keyboardType(.decimalPad)
                 .font(.inter(16))
                 .padding(Spacing.m)

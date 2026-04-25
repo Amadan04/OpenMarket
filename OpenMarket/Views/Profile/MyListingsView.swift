@@ -52,7 +52,6 @@ struct MyListingsView: View {
                         ("\(activeListings.count)", "Active"),
                         ("\(soldListings.count)", "Sold"),
                         ("\(totalViews)", "Views"),
-                        ("—", "Messages")
                     ]
                     ForEach(Array(stats.enumerated()), id: \.offset) { idx, s in
                         VStack(spacing: 2) {

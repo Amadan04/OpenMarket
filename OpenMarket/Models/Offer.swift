@@ -14,6 +14,8 @@ struct Offer: Codable, Identifiable {
     let status: OfferStatus
     let counterAmount: Double?
     let buyerName: String?
+    let listingTitle: String?
+    let sellerName: String?
     let createdAt: Date
     let updatedAt: Date
 
@@ -24,6 +26,8 @@ struct Offer: Codable, Identifiable {
         case sellerID      = "seller_id"
         case counterAmount = "counter_amount"
         case buyerName     = "buyer_name"
+        case listingTitle  = "listing_title"
+        case sellerName    = "seller_name"
         case createdAt     = "created_at"
         case updatedAt     = "updated_at"
     }

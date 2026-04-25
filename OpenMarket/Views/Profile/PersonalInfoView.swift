@@ -80,6 +80,14 @@ struct PersonalInfoView: View {
                                 .transition(.scale.combined(with: .opacity))
                             }
 
+                            if let err = saveError {
+                                HStack(spacing: Spacing.s) {
+                                    Image(systemName: "exclamationmark.circle.fill").foregroundStyle(Color.omError)
+                                    Text(err).font(.inter(13)).foregroundStyle(Color.omError)
+                                }
+                                .transition(.opacity)
+                            }
+
                             OMButton(label: "Save changes", size: .lg, fullWidth: true, isLoading: isSaving) {
                                 save()
                             }
@@ -105,16 +113,29 @@ struct PersonalInfoView: View {
         }
     }
 
+    @State private var saveError: String? = nil
+
     private func save() {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
         isSaving = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-            isSaving = false
-            withAnimation(.spring(response: 0.4)) {
-                saved = true
-                isEditing = false
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                withAnimation { saved = false }
+        saveError = nil
+        Task {
+            defer { isSaving = false }
+            do {
+                try await authViewModel.updateProfile(name: trimmed)
+                withAnimation(.spring(response: 0.4)) {
+                    saved = true
+                    isEditing = false
+                }
+                Task {
+                    try? await Task.sleep(nanoseconds: 2_500_000_000)
+                    withAnimation { saved = false }
+                }
+            } catch let APIError.serverError(msg) {
+                saveError = msg
+            } catch {
+                saveError = "Failed to save changes."
             }
         }
     }

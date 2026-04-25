@@ -6,8 +6,9 @@ struct SearchView: View {
     @ObservedObject private var historyStore = SearchHistoryStore.shared
     @State private var query = ""
     @FocusState private var focused: Bool
+    @State private var lastQuery = ""
 
-    private let trending = ["Vintage camera", "Mid-century furniture", "Bikes under $500", "Plants", "Records"]
+    private let trending = ["Vintage camera", "Mid-century furniture", "Bikes under BHD 500", "Plants", "Records"]
 
     var body: some View {
         ZStack {
@@ -64,6 +65,21 @@ struct SearchView: View {
                         }
                         .padding(.horizontal, Spacing.xl)
                     }
+                } else if !lastQuery.isEmpty {
+                    // No results
+                    VStack(spacing: Spacing.m) {
+                        Spacer()
+                        Image(systemName: "magnifyingglass")
+                            .font(.system(size: 44))
+                            .foregroundStyle(Color.omTextSubtle)
+                        Text("No results for \"\(lastQuery)\"")
+                            .font(.omTitle3).foregroundStyle(Color.omText)
+                        Text("Try different keywords or check your spelling.")
+                            .font(.omBody).foregroundStyle(Color.omTextMuted)
+                            .multilineTextAlignment(.center)
+                        Spacer()
+                    }
+                    .padding(.horizontal, Spacing.x4)
                 } else {
                     // Browse state
                     ScrollView {
@@ -100,6 +116,7 @@ struct SearchView: View {
     private func search() async {
         let trimmed = query.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty else { return }
+        lastQuery = trimmed
         SearchHistoryStore.shared.record(trimmed)
         viewModel.searchText = trimmed
         await viewModel.applyFilters()

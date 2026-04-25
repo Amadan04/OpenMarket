@@ -3,8 +3,6 @@ import SwiftUI
 struct ConversationsView: View {
     @StateObject private var viewModel = ChatViewModel()
     @State private var searchText = ""
-    @State private var selectedFilter = "All"
-    private let filters = ["All", "Buying", "Selling", "Unread"]
 
     var body: some View {
         NavigationStack {
@@ -34,18 +32,6 @@ struct ConversationsView: View {
                     .overlay(Capsule().stroke(Color.omBorder, lineWidth: 1))
                     .padding(.horizontal, Spacing.xl)
                     .padding(.bottom, Spacing.m)
-
-                    // Filter chips
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: Spacing.s) {
-                            ForEach(filters, id: \.self) { f in
-                                OMChip(label: f, active: selectedFilter == f)
-                                    .onTapGesture { selectedFilter = f }
-                            }
-                        }
-                        .padding(.horizontal, Spacing.xl)
-                    }
-                    .padding(.bottom, Spacing.s)
 
                     Divider()
 
@@ -85,9 +71,9 @@ struct ConversationsView: View {
     }
 
     private var filteredConversations: [Conversation] {
-        viewModel.conversations.filter { conv in
-            if searchText.isEmpty { return true }
-            return conv.participant.name.localizedCaseInsensitiveContains(searchText)
+        guard !searchText.isEmpty else { return viewModel.conversations }
+        return viewModel.conversations.filter { conv in
+            conv.participant.name.localizedCaseInsensitiveContains(searchText)
                 || conv.lastMessage.content.localizedCaseInsensitiveContains(searchText)
         }
     }

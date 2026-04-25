@@ -265,7 +265,7 @@ struct AddProductView: View {
                 VStack(spacing: Spacing.s) {
                     Text("YOUR PRICE").font(.omMicro).foregroundStyle(Color.omTextMuted)
                     HStack(alignment: .firstTextBaseline, spacing: 0) {
-                        Text("$").font(.serif(36)).foregroundStyle(Color.omTextMuted)
+                        Text("BHD").font(.inter(16, weight: .semibold)).foregroundStyle(Color.omTextMuted).padding(.trailing, 6)
                         TextField("0", text: $viewModel.price)
                             .font(.serif(64))
                             .foregroundStyle(Color.omText)

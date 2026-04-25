@@ -146,6 +146,8 @@ struct HomeView: View {
                         if viewModel.isLoading {
                             SkeletonGrid(count: 6)
                                 .padding(.horizontal, Spacing.xl)
+                        } else if let err = viewModel.errorMessage {
+                            errorState(err)
                         } else if viewModel.products.isEmpty {
                             emptyState
                         } else {
@@ -233,6 +235,26 @@ struct HomeView: View {
             Image(systemName: "magnifyingglass").font(.system(size: 40)).foregroundStyle(Color.omTextSubtle)
             Text("No listings found").font(.omTitle3).foregroundStyle(Color.omText)
             Text("Try adjusting your filters.").font(.omBody).foregroundStyle(Color.omTextMuted)
+        }
+        .padding(.top, Spacing.x4)
+    }
+
+    private func errorState(_ message: String) -> some View {
+        VStack(spacing: Spacing.l) {
+            Image(systemName: "wifi.exclamationmark")
+                .font(.system(size: 44))
+                .foregroundStyle(Color.omTextMuted)
+            Text("Couldn't load listings")
+                .font(.omTitle3)
+                .foregroundStyle(Color.omText)
+            Text(message)
+                .font(.omBody)
+                .foregroundStyle(Color.omTextMuted)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, Spacing.x4)
+            OMButton(label: "Try Again", variant: .secondary, size: .md, icon: "arrow.clockwise") {
+                Task { await viewModel.loadProducts() }
+            }
         }
         .padding(.top, Spacing.x4)
     }

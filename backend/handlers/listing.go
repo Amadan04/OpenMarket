@@ -13,6 +13,12 @@ import (
 	"gorm.io/gorm"
 )
 
+var allowedCategories = map[string]bool{
+	"Vehicles": true, "Property": true, "Mobile": true,
+	"Electronics": true, "Furniture": true, "Fashion": true,
+	"Sports": true, "Books": true, "Other": true,
+}
+
 func CreateListing(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var listing models.Listing
@@ -22,8 +28,21 @@ func CreateListing(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		listing.Title = strings.TrimSpace(listing.Title)
+		listing.Description = strings.TrimSpace(listing.Description)
 		if listing.Title == "" || listing.Price < 0 {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Title is required and price must be non-negative"})
+			return
+		}
+		if len(listing.Title) > 255 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Title must be 255 characters or fewer"})
+			return
+		}
+		if len(listing.Description) > 2000 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Description must be 2000 characters or fewer"})
+			return
+		}
+		if listing.Category != "" && !allowedCategories[listing.Category] {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid category"})
 			return
 		}
 		if listing.Images == nil {
@@ -148,8 +167,21 @@ func UpdateListing(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		input.Title = strings.TrimSpace(input.Title)
+		input.Description = strings.TrimSpace(input.Description)
 		if input.Title == "" || input.Price < 0 {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Title is required and price must be non-negative"})
+			return
+		}
+		if len(input.Title) > 255 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Title must be 255 characters or fewer"})
+			return
+		}
+		if len(input.Description) > 2000 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Description must be 2000 characters or fewer"})
+			return
+		}
+		if input.Category != "" && !allowedCategories[input.Category] {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid category"})
 			return
 		}
 

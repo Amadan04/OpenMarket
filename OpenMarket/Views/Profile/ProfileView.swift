@@ -5,6 +5,8 @@ struct ProfileView: View {
     @StateObject private var viewModel = ProfileViewModel()
     @State private var showFavorites = false
     @State private var showMyListings = false
+    @State private var showHelp = false
+    @State private var showTerms = false
 
     var body: some View {
         NavigationStack {
@@ -54,6 +56,7 @@ struct ProfileView: View {
                             .init(emoji: "❤️", title: "Saved items", badge: nil, destination: AnyView(FavoritesView())),
                             .init(emoji: "🏷️", title: "My listings", badge: "\(viewModel.myListings.count) active", destination: AnyView(MyListingsView())),
                             .init(emoji: "📩", title: "Incoming offers", badge: nil, destination: AnyView(AllIncomingOffersView())),
+                            .init(emoji: "🤝", title: "My offers", badge: nil, destination: AnyView(MyOffersView())),
                             .init(emoji: "⭐", title: "Reviews", badge: "\(viewModel.myReviews?.reviewsCount ?? 0)", destination: AnyView(ReviewsView(sellerID: authViewModel.currentUser?.id ?? 0))),
                         ])
 
@@ -65,8 +68,8 @@ struct ProfileView: View {
                         ])
 
                         settingsGroup(header: "Support", rows: [
-                            .init(emoji: "❓", title: "Help center", badge: nil, destination: nil),
-                            .init(emoji: "📄", title: "Terms & privacy", badge: nil, destination: nil),
+                            .init(emoji: "❓", title: "Help center", badge: nil, destination: AnyView(HelpCenterView())),
+                            .init(emoji: "📄", title: "Terms & privacy", badge: nil, destination: AnyView(TermsView())),
                         ])
 
                         // Log out

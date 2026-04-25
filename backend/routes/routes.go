@@ -19,6 +19,7 @@ func Setup(r *gin.Engine, db *gorm.DB, h *hub.Hub) {
 	authProtected.Use(middleware.AuthMiddleware())
 	{
 		authProtected.GET("/me", handlers.Me(db))
+		authProtected.PATCH("/profile", handlers.UpdateProfile(db))
 	}
 
 	// WebSocket — auth via ?token= query param (not middleware).

@@ -44,6 +44,24 @@ final class AuthViewModel: ObservableObject {
         }
     }
 
+    func updateProfile(name: String) async throws {
+        struct UpdateBody: Encodable { let name: String }
+        struct UserResponse: Decodable {
+            let id: Int
+            let name: String
+            let email: String
+            let createdAt: Date
+            enum CodingKeys: String, CodingKey {
+                case id, name, email
+                case createdAt = "created_at"
+            }
+        }
+        let response: UserResponse = try await APIClient.shared.request(
+            "/auth/profile", method: "PATCH", body: UpdateBody(name: name)
+        )
+        currentUser = User(id: response.id, name: response.name, email: response.email, createdAt: response.createdAt)
+    }
+
     func logout() {
         KeychainHelper.clear()
         currentUser = nil

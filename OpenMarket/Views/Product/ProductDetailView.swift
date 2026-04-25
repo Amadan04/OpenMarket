@@ -12,6 +12,7 @@ struct ProductDetailView: View {
     @State private var showSellerProfile = false
     @State private var showGallery = false
     @State private var showAccepted = false
+    @State private var showWithdrawConfirm = false
     @State private var imageIndex = 0
 
     init(product: Product) {
@@ -376,7 +377,7 @@ struct ProductDetailView: View {
 
             if offer.status == .pending {
                 Button {
-                    Task { await viewModel.withdrawOffer() }
+                    showWithdrawConfirm = true
                 } label: {
                     if viewModel.isWithdrawingOffer {
                         ProgressView().scaleEffect(0.7)
@@ -387,6 +388,14 @@ struct ProductDetailView: View {
                     }
                 }
                 .buttonStyle(.plain)
+                .confirmationDialog("Withdraw your offer?", isPresented: $showWithdrawConfirm, titleVisibility: .visible) {
+                    Button("Withdraw Offer", role: .destructive) {
+                        Task { await viewModel.withdrawOffer() }
+                    }
+                    Button("Cancel", role: .cancel) {}
+                } message: {
+                    Text("Your offer will be cancelled and the seller will be notified.")
+                }
             } else if offer.status == .countered {
                 HStack(spacing: Spacing.s) {
                     Button {

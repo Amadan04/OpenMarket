@@ -150,6 +150,44 @@ func Me(db *gorm.DB) gin.HandlerFunc {
 	}
 }
 
+func UpdateProfile(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userID := c.GetUint("user_id")
+
+		var body struct {
+			Name string `json:"name"`
+		}
+		if err := c.ShouldBindJSON(&body); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+			return
+		}
+
+		body.Name = strings.TrimSpace(body.Name)
+		if body.Name == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Name cannot be empty"})
+			return
+		}
+		if len(body.Name) > 100 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Name must be 100 characters or fewer"})
+			return
+		}
+
+		if err := db.Model(&models.User{}).Where("id = ?", userID).Update("name", body.Name).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update profile"})
+			return
+		}
+
+		var user models.User
+		db.First(&user, userID)
+		c.JSON(http.StatusOK, gin.H{
+			"id":         user.ID,
+			"name":       user.Name,
+			"email":      user.Email,
+			"created_at": user.CreatedAt,
+		})
+	}
+}
+
 func GetUser(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
