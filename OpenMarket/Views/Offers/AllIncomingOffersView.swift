@@ -233,7 +233,7 @@ private struct OfferRowView: View {
                                 .font(.inter(13, weight: .semibold))
                                 .foregroundStyle(Color.stone600)
                                 .frame(width: 70, height: 32)
-                                .background(Color.stone200)
+                                .background(Color.omBgSunken)
                                 .clipShape(RoundedRectangle(cornerRadius: Radius.sm))
                         }
                         .buttonStyle(.plain)

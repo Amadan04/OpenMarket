@@ -172,6 +172,11 @@ func RespondToOffer(db *gorm.DB) gin.HandlerFunc {
 				"is_sold":  true,
 				"buyer_id": offer.BuyerID,
 			})
+			db.Create(&models.Message{
+				SenderID:   offer.SellerID,
+				ReceiverID: offer.BuyerID,
+				Content:    "🎉 Offer accepted! Let's arrange pickup and payment.",
+			})
 		case "decline":
 			offer.Status = models.OfferStatusDeclined
 		case "counter":
@@ -244,6 +249,11 @@ func BuyerRespondToOffer(db *gorm.DB) gin.HandlerFunc {
 			db.Model(&models.Listing{}).Where("id = ?", offer.ListingID).Updates(map[string]interface{}{
 				"is_sold":  true,
 				"buyer_id": offer.BuyerID,
+			})
+			db.Create(&models.Message{
+				SenderID:   offer.BuyerID,
+				ReceiverID: offer.SellerID,
+				Content:    "🎉 Counter offer accepted! Let's arrange pickup and payment.",
 			})
 		case "decline":
 			offer.Status = models.OfferStatusDeclined

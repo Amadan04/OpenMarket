@@ -11,6 +11,7 @@ struct ProductDetailView: View {
     @State private var showRateSeller = false
     @State private var showSellerProfile = false
     @State private var showGallery = false
+    @State private var showAccepted = false
     @State private var imageIndex = 0
 
     init(product: Product) {
@@ -145,6 +146,10 @@ struct ProductDetailView: View {
             async let offer: () = viewModel.loadMyOffer()
             async let seller: () = viewModel.loadSellerInfo()
             _ = await (reviews, offer, seller)
+            if viewModel.myOffer?.status == .accepted,
+               authViewModel.currentUser?.id != viewModel.product.userID {
+                showAccepted = true
+            }
         }
         .sheet(isPresented: $showChat) {
             if authViewModel.currentUser != nil {
@@ -167,6 +172,9 @@ struct ProductDetailView: View {
         }
         .sheet(isPresented: $showRateSeller) {
             RateSellerView(sellerID: viewModel.product.userID, sellerName: viewModel.sellerName, product: viewModel.product)
+        }
+        .sheet(isPresented: $showAccepted) {
+            acceptedSheet
         }
         .navigationDestination(isPresented: $showSellerProfile) {
             SellerProfileView(sellerID: viewModel.product.userID)
@@ -440,5 +448,45 @@ struct ProductDetailView: View {
         case .countered: return Color.stone600
         case .withdrawn: return Color.omTextMuted
         }
+    }
+
+    private var acceptedSheet: some View {
+        VStack(spacing: Spacing.xl) {
+            Spacer()
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 64))
+                .foregroundStyle(Color.omOk)
+
+            VStack(spacing: Spacing.s) {
+                Text("Offer Accepted!")
+                    .font(.serif(30))
+                    .foregroundStyle(Color.omText)
+                Text("The seller has accepted your offer of \(viewModel.myOffer?.amount.formatted(.currency(code: "USD").precision(.fractionLength(0))) ?? ""). Message them to arrange pickup and payment.")
+                    .font(.inter(15))
+                    .foregroundStyle(Color.omTextMuted)
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(4)
+            }
+            .padding(.horizontal, Spacing.xl)
+
+            Spacer()
+
+            VStack(spacing: Spacing.m) {
+                OMButton(label: "Message Seller", size: .lg, icon: "bubble.left.fill", fullWidth: true) {
+                    showAccepted = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        showChat = true
+                    }
+                }
+                Button("Dismiss") {
+                    showAccepted = false
+                }
+                .font(.inter(14))
+                .foregroundStyle(Color.omTextMuted)
+            }
+            .padding(.horizontal, Spacing.xl)
+            .padding(.bottom, Spacing.x4)
+        }
+        .presentationDetents([.medium])
     }
 }
