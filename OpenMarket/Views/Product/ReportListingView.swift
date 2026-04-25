@@ -125,6 +125,7 @@ struct ReportListingView: View {
                 }
         }
         .presentationBackground(Color.omBg)
+        .presentationDragIndicator(.hidden)
         .animation(.spring(response: 0.4), value: submitted)
         .presentationDetents([.large])
     }

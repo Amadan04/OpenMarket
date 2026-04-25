@@ -157,6 +157,8 @@ struct MakeOfferView: View {
         }
         .presentationBackground(Color.omBg)
         .presentationDetents([.large])
+        .presentationDragIndicator(.hidden)
+        .ignoresSafeArea(.keyboard)
         .onAppear { offerFocused = true }
     }
 

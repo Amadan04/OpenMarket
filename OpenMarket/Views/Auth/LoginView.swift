@@ -132,5 +132,6 @@ struct LoginView: View {
             .padding(.top, Spacing.l)
         .presentationBackground(Color.omBg)
         .presentationDetents([.medium])
+        .presentationDragIndicator(.hidden)
     }
 }

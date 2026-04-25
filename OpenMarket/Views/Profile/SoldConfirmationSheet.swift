@@ -138,6 +138,7 @@ struct SoldConfirmationSheet: View {
         }
         .presentationBackground(Color.omBg)
         .presentationDetents([.large])
+        .presentationDragIndicator(.hidden)
         .task { await loadConversations() }
         .sheet(isPresented: $showReviewPrompt) {
             if let p = soldProduct, let buyerID = p.buyerID {

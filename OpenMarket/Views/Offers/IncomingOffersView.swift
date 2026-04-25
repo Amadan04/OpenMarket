@@ -326,5 +326,6 @@ struct IncomingOffersView: View {
         }
         .presentationBackground(Color.omBg)
         .presentationDetents([.medium])
+        .presentationDragIndicator(.hidden)
     }
 }
