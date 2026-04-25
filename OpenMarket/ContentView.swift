@@ -24,13 +24,12 @@ struct ContentView: View {
 
 struct MainTabView: View {
     @EnvironmentObject var appState: AppState
-    @State private var selectedTab: OMTab = .home
     @State private var showSell = false
 
     var body: some View {
         ZStack(alignment: .bottom) {
             Group {
-                switch selectedTab {
+                switch appState.selectedTab {
                 case .home:     HomeView()
                 case .map:      MapView()
                 case .sell:     HomeView()
@@ -40,11 +39,11 @@ struct MainTabView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .transition(.opacity.combined(with: .scale(scale: 0.98)))
-            .animation(.easeInOut(duration: 0.2), value: selectedTab)
+            .animation(.easeInOut(duration: 0.2), value: appState.selectedTab)
             .safeAreaInset(edge: .bottom) { Color.clear.frame(height: appState.showTabBar ? 84 : 0) }
 
             if appState.showTabBar {
-                OMTabBar(selected: $selectedTab, onSell: { showSell = true })
+                OMTabBar(selected: $appState.selectedTab, onSell: { showSell = true })
                     .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }

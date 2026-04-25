@@ -3,6 +3,7 @@ import MapKit
 
 struct MapView: View {
     @StateObject private var locationService = LocationService.shared
+    @EnvironmentObject var appState: AppState
     @State private var products: [Product] = []
     @State private var selectedProduct: Product?
     @State private var isLoading = false
@@ -95,9 +96,14 @@ struct MapView: View {
                         Image(systemName: "magnifyingglass").foregroundStyle(Color.omTextMuted)
                         Text("Nearby").font(.omCallout).foregroundStyle(Color.omText)
                         Spacer()
-                        Text("List")
-                            .font(.inter(13, weight: .semibold))
-                            .foregroundStyle(Color.omAccent)
+                        Button {
+                            appState.selectedTab = .home
+                        } label: {
+                            Text("List")
+                                .font(.inter(13, weight: .semibold))
+                                .foregroundStyle(Color.omAccent)
+                        }
+                        .buttonStyle(.plain)
                     }
                     .padding(.horizontal, Spacing.l)
                     .frame(height: 48)
