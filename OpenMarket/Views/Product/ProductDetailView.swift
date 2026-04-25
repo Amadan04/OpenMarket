@@ -18,13 +18,12 @@ struct ProductDetailView: View {
     }
 
     var body: some View {
-        ZStack(alignment: .bottom) {
-            ScrollView {
-                VStack(spacing: 0) {
-                    // Image carousel
-                    imageCarousel
+        ScrollView {
+            VStack(spacing: 0) {
+                // Image carousel
+                imageCarousel
 
-                    VStack(alignment: .leading, spacing: 0) {
+                VStack(alignment: .leading, spacing: 0) {
                         // Condition + age
                         HStack {
                             Text("LIKE NEW · \(viewModel.product.category.uppercased())")
@@ -102,13 +101,10 @@ struct ProductDetailView: View {
                         }
                     }
                     .padding(.horizontal, Spacing.xl)
-
-                    Color.clear.frame(height: 120) // bottom padding for sticky bar
-                }
             }
-            .ignoresSafeArea(edges: .top)
-
-            // Sticky bottom bar
+        }
+        .ignoresSafeArea(edges: .top)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
             stickyBar
         }
         .navigationBarHidden(true)
