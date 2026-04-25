@@ -53,7 +53,7 @@ struct ProfileView: View {
                         settingsGroup(header: "Activity", rows: [
                             .init(emoji: "❤️", title: "Saved items", badge: nil, destination: AnyView(FavoritesView())),
                             .init(emoji: "🏷️", title: "My listings", badge: "\(viewModel.myListings.count) active", destination: AnyView(MyListingsView())),
-                            .init(emoji: "📩", title: "Incoming offers", badge: nil, destination: AnyView(MyListingsView())),
+                            .init(emoji: "📩", title: "Incoming offers", badge: nil, destination: AnyView(AllIncomingOffersView())),
                             .init(emoji: "⭐", title: "Reviews", badge: "\(viewModel.myReviews?.reviewsCount ?? 0)", destination: AnyView(ReviewsView(sellerID: authViewModel.currentUser?.id ?? 0))),
                         ])
 
