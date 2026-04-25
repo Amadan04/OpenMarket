@@ -7,7 +7,7 @@ struct MyListingsView: View {
     @State private var soldSheetProduct: Product? = nil
     @Environment(\.dismiss) private var dismiss
 
-    private let tabs = ["Active", "Sold", "Drafts"]
+    private let tabs = ["Active", "Sold"]
 
     private var activeListings: [Product] { viewModel.myListings.filter { !$0.isSold } }
     private var soldListings: [Product]   { viewModel.myListings.filter { $0.isSold } }
@@ -103,7 +103,7 @@ struct MyListingsView: View {
                 } else {
                     ScrollView {
                         LazyVStack(spacing: Spacing.m) {
-                            let list = selectedTab == "Active" ? activeListings : selectedTab == "Sold" ? soldListings : []
+                            let list = selectedTab == "Active" ? activeListings : soldListings
                             if list.isEmpty {
                                 emptyState
                             } else {
@@ -114,6 +114,11 @@ struct MyListingsView: View {
                         }
                         .padding(.horizontal, Spacing.xl)
                         .padding(.vertical, Spacing.m)
+                    }
+                    .refreshable {
+                        if let id = authViewModel.currentUser?.id {
+                            await viewModel.loadMyListings(userID: id)
+                        }
                     }
                 }
             }

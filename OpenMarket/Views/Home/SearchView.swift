@@ -111,6 +111,14 @@ struct SearchView: View {
         }
         .navigationBarHidden(true)
         .onAppear { focused = true }
+        .onChange(of: query) { _, newValue in
+            guard !newValue.trimmingCharacters(in: .whitespaces).isEmpty else { return }
+            Task {
+                try? await Task.sleep(nanoseconds: 400_000_000)
+                guard query == newValue else { return }
+                await search()
+            }
+        }
     }
 
     private func search() async {

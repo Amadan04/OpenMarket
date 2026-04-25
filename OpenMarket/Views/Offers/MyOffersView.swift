@@ -100,6 +100,7 @@ struct MyOffersView: View {
                         .padding(.vertical, Spacing.m)
                         .padding(.bottom, 80)
                     }
+                    .refreshable { await load() }
                 }
             }
         }

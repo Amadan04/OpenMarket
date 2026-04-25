@@ -65,7 +65,7 @@ struct RateSellerView: View {
                                 .clipShape(RoundedRectangle(cornerRadius: Radius.sm))
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(p.title).font(.inter(14, weight: .semibold)).foregroundStyle(Color.omText)
-                                    Text("Recently").font(.inter(12)).foregroundStyle(Color.omTextMuted)
+                                    Text("Purchased").font(.inter(12)).foregroundStyle(Color.omTextMuted)
                                 }
                                 Spacer()
                                 Text(p.price.formatted(.currency(code: "BHD").precision(.fractionLength(0))))

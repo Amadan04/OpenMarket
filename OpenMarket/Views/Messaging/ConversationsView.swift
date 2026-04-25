@@ -62,6 +62,7 @@ struct ConversationsView: View {
                             }
                             .padding(.horizontal, Spacing.s)
                         }
+                        .refreshable { await viewModel.loadConversations() }
                     }
                 }
             }

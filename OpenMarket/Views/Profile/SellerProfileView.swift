@@ -6,7 +6,15 @@ struct SellerProfileView: View {
     @State private var selectedTab = 1 // 0=listings, 1=reviews, 2=about
     @State private var showChat = false
     @Environment(\.dismiss) private var dismiss
-    @State private var isFollowing = false
+    @AppStorage("following") private var followingData: String = "[]"
+    private var isFollowing: Bool {
+        (try? JSONDecoder().decode([Int].self, from: Data(followingData.utf8)))?.contains(sellerID) ?? false
+    }
+    private func toggleFollow() {
+        var ids = (try? JSONDecoder().decode([Int].self, from: Data(followingData.utf8))) ?? []
+        if ids.contains(sellerID) { ids.removeAll { $0 == sellerID } } else { ids.append(sellerID) }
+        followingData = String(data: (try? JSONEncoder().encode(ids)) ?? Data(), encoding: .utf8) ?? "[]"
+    }
     @State private var showBlockConfirm = false
     @State private var isBlocked = false
     @State private var isTogglingBlock = false
@@ -114,7 +122,7 @@ struct SellerProfileView: View {
                             size: .md
                         ) {
                             withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                isFollowing.toggle()
+                                toggleFollow()
                             }
                         }
                     }

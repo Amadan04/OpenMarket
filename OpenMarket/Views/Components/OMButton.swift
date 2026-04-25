@@ -1,6 +1,6 @@
 import SwiftUI
 
-enum OMButtonVariant { case primary, secondary, ghost, dark }
+enum OMButtonVariant { case primary, secondary, ghost, dark, danger }
 enum OMButtonSize { case sm, md, lg }
 
 struct OMButton: View {
@@ -22,11 +22,12 @@ struct OMButton: View {
         case .secondary: .omBgElevated
         case .ghost:     .clear
         case .dark:      .stone700
+        case .danger:    .omDanger
         }
     }
     private var fg: Color {
         switch variant {
-        case .primary, .dark: .white
+        case .primary, .dark, .danger: .white
         case .secondary, .ghost: .omText
         }
     }
