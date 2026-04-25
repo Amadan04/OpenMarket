@@ -17,7 +17,7 @@ struct ProductCardView: View {
                         .overlay(Image(systemName: "photo").font(.system(size: 24)).foregroundStyle(Color.stone300))
                 }
             }
-            .frame(height: 130)
+            .frame(maxWidth: .infinity, minHeight: 130, maxHeight: 130)
             .clipped()
             .overlay(alignment: .topTrailing) {
                 Button { onFavorite?() } label: {
@@ -65,7 +65,7 @@ struct ProductCardView: View {
             .padding(8)
             .frame(height: 76, alignment: .topLeading)
         }
-        // Total card height = 130 + 76 = 206 — always identical
+        .frame(maxWidth: .infinity)
         .background(Color.omBgElevated)
         .clipShape(RoundedRectangle(cornerRadius: Radius.lg))
         .overlay(RoundedRectangle(cornerRadius: Radius.lg).stroke(Color.omBorder, lineWidth: 1))
