@@ -200,20 +200,23 @@ struct HomeView: View {
     @ViewBuilder
     private func sectionCard(title: String, subtitle: String, icon: String, bg: Color, destination: AnyView) -> some View {
         NavigationLink(destination: destination) {
-            HStack(spacing: Spacing.l) {
+            HStack(spacing: Spacing.s) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(subtitle.uppercased())
                         .font(.omMicro)
                         .foregroundStyle(.white.opacity(0.6))
+                        .lineLimit(1)
                     Text(title)
                         .font(.serif(22))
                         .foregroundStyle(.white)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.65)
                 }
-                Spacer()
+                Spacer(minLength: 0)
                 Image(systemName: icon)
                     .font(.system(size: 22, weight: .semibold))
                     .foregroundStyle(.white.opacity(0.9))
-                    .frame(width: 52, height: 52)
+                    .frame(width: 44, height: 44)
                     .background(.white.opacity(0.15))
                     .clipShape(RoundedRectangle(cornerRadius: Radius.md))
             }
@@ -240,33 +243,28 @@ private struct MasonryGrid: View {
     let products: [Product]
     @State private var appeared = false
 
-    private var gridHeight: CGFloat {
-        let rows = ceil(Double(products.count) / 2.0)
-        return rows * 220 + rows * Spacing.m
-    }
+    private let columns = [
+        GridItem(.flexible(), spacing: Spacing.m),
+        GridItem(.flexible(), spacing: Spacing.m)
+    ]
 
     var body: some View {
-        GeometryReader { geo in
-            let colWidth = (geo.size.width - Spacing.m) / 2
-            LazyVGrid(columns: [GridItem(.fixed(colWidth)), GridItem(.fixed(colWidth))], spacing: Spacing.m) {
-                ForEach(Array(products.enumerated()), id: \.element.id) { idx, product in
-                    NavigationLink {
-                        ProductDetailView(product: product)
-                    } label: {
-                        ProductCardView(product: product)
-                            .frame(width: colWidth)
-                    }
-                    .buttonStyle(PressScaleButtonStyle())
-                    .opacity(appeared ? 1 : 0)
-                    .offset(y: appeared ? 0 : 16)
-                    .animation(
-                        .spring(response: 0.4, dampingFraction: 0.8).delay(Double(idx) * 0.04),
-                        value: appeared
-                    )
+        LazyVGrid(columns: columns, spacing: Spacing.m) {
+            ForEach(Array(products.enumerated()), id: \.element.id) { idx, product in
+                NavigationLink {
+                    ProductDetailView(product: product)
+                } label: {
+                    ProductCardView(product: product)
                 }
+                .buttonStyle(PressScaleButtonStyle())
+                .opacity(appeared ? 1 : 0)
+                .offset(y: appeared ? 0 : 16)
+                .animation(
+                    .spring(response: 0.4, dampingFraction: 0.8).delay(Double(idx) * 0.04),
+                    value: appeared
+                )
             }
         }
-        .frame(height: gridHeight)
         .onAppear { appeared = true }
     }
 }
