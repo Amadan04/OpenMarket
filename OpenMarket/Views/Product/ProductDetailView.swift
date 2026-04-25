@@ -31,7 +31,7 @@ struct ProductDetailView: View {
                                 .font(.omMicro)
                                 .foregroundStyle(Color.sage500)
                             Spacer()
-                            Text("Posted recently")
+                            Text(viewModel.product.createdAt, style: .relative)
                                 .font(.omMicro)
                                 .foregroundStyle(Color.omTextMuted)
                         }
@@ -42,7 +42,7 @@ struct ProductDetailView: View {
                             .foregroundStyle(Color.omText)
                             .padding(.top, Spacing.s)
 
-                        Text(viewModel.product.price.formatted(.currency(code: "USD").precision(.fractionLength(0))))
+                        Text(viewModel.product.price.formatted(.currency(code: "BHD").precision(.fractionLength(0))))
                             .font(.inter(28, weight: .bold))
                             .foregroundStyle(Color.omAccent)
                             .kerning(-0.3)
@@ -366,7 +366,7 @@ struct ProductDetailView: View {
                     .font(.inter(13, weight: .semibold))
                     .foregroundStyle(offerStatusColor(offer.status))
                 if let counter = offer.counterAmount, offer.status == .countered {
-                    Text("Counter offer: \(counter.formatted(.currency(code: "USD").precision(.fractionLength(0))))")
+                    Text("Counter offer: \(counter.formatted(.currency(code: "BHD").precision(.fractionLength(0))))")
                         .font(.inter(12))
                         .foregroundStyle(Color.omTextMuted)
                 }
@@ -422,7 +422,7 @@ struct ProductDetailView: View {
 
     private func offerStatusLabel(_ offer: Offer) -> String {
         switch offer.status {
-        case .pending:   return "Offer of \(offer.amount.formatted(.currency(code: "USD").precision(.fractionLength(0)))) pending"
+        case .pending:   return "Offer of \(offer.amount.formatted(.currency(code: "BHD").precision(.fractionLength(0)))) pending"
         case .accepted:  return "Offer accepted!"
         case .declined:  return "Offer declined"
         case .countered: return "Seller countered your offer"
@@ -461,7 +461,7 @@ struct ProductDetailView: View {
                 Text("Offer Accepted!")
                     .font(.serif(30))
                     .foregroundStyle(Color.omText)
-                Text("The seller has accepted your offer of \(viewModel.myOffer?.amount.formatted(.currency(code: "USD").precision(.fractionLength(0))) ?? ""). Message them to arrange pickup and payment.")
+                Text("The seller has accepted your offer of \(viewModel.myOffer?.amount.formatted(.currency(code: "BHD").precision(.fractionLength(0))) ?? ""). Message them to arrange pickup and payment.")
                     .font(.inter(15))
                     .foregroundStyle(Color.omTextMuted)
                     .multilineTextAlignment(.center)

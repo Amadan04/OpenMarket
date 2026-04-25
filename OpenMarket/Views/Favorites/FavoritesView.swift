@@ -66,7 +66,7 @@ struct FavoritesView: View {
                                                     .font(.inter(15, weight: .semibold))
                                                     .foregroundStyle(Color.omText)
                                                     .lineLimit(2)
-                                                Text(fav.product.price.formatted(.currency(code: "USD").precision(.fractionLength(0))))
+                                                Text(fav.product.price.formatted(.currency(code: "BHD").precision(.fractionLength(0))))
                                                     .font(.inter(16, weight: .bold))
                                                     .foregroundStyle(Color.omAccent)
                                                 HStack(spacing: 3) {

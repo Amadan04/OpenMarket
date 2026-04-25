@@ -59,7 +59,7 @@ struct SoldConfirmationSheet: View {
                             .font(.inter(14, weight: .semibold))
                             .foregroundStyle(Color.omText)
                             .lineLimit(1)
-                        Text(product.price.formatted(.currency(code: "USD").precision(.fractionLength(0))))
+                        Text(product.price.formatted(.currency(code: "BHD").precision(.fractionLength(0))))
                             .font(.inter(13, weight: .bold))
                             .foregroundStyle(Color.omAccent)
                     }

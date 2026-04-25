@@ -53,7 +53,7 @@ struct ProductCardView: View {
                     .lineLimit(2)
                     .frame(height: 32, alignment: .topLeading)
 
-                Text(product.price.formatted(.currency(code: "USD").precision(.fractionLength(0))))
+                Text(product.price.formatted(.currency(code: "BHD").precision(.fractionLength(0))))
                     .font(.inter(13, weight: .bold))
                     .foregroundStyle(Color.omAccent)
 
@@ -96,7 +96,7 @@ struct ProductRowCard: View {
                     .foregroundStyle(Color.omText)
                     .lineLimit(2)
 
-                Text(product.price.formatted(.currency(code: "USD").precision(.fractionLength(0))))
+                Text(product.price.formatted(.currency(code: "BHD").precision(.fractionLength(0))))
                     .font(.inter(16, weight: .bold))
                     .foregroundStyle(Color.omAccent)
 

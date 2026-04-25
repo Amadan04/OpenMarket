@@ -8,6 +8,7 @@ struct IncomingOffersView: View {
     @State private var showCounterSheet = false
     @State private var counteringOffer: Offer? = nil
     @State private var counterText = ""
+    @State private var toastMessage: String? = nil
 
     var body: some View {
         ZStack {
@@ -73,9 +74,32 @@ struct IncomingOffersView: View {
         }
         .navigationBarHidden(true)
         .task { await viewModel.loadOffers(forListingID: product.id) }
+        .onChange(of: viewModel.lastAction) { _, msg in
+            guard let msg else { return }
+            toastMessage = msg
+            Task {
+                try? await Task.sleep(nanoseconds: 2_000_000_000)
+                toastMessage = nil
+                viewModel.lastAction = nil
+            }
+        }
         .sheet(isPresented: $showCounterSheet) {
             counterSheet
         }
+        .overlay(alignment: .top) {
+            if let msg = toastMessage {
+                Text(msg)
+                    .font(.inter(13, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, Spacing.l)
+                    .padding(.vertical, Spacing.m)
+                    .background(Color.omOk)
+                    .clipShape(Capsule())
+                    .padding(.top, Spacing.m)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+            }
+        }
+        .animation(.spring(response: 0.4, dampingFraction: 0.75), value: toastMessage)
     }
 
     private var emptyState: some View {
@@ -115,10 +139,10 @@ struct IncomingOffersView: View {
                 Spacer()
 
                 VStack(alignment: .trailing, spacing: 2) {
-                    Text(offer.amount.formatted(.currency(code: "USD").precision(.fractionLength(0))))
+                    Text(offer.amount.formatted(.currency(code: "BHD").precision(.fractionLength(0))))
                         .font(.serif(22))
                         .foregroundStyle(Color.omAccent)
-                    Text("vs \(product.price.formatted(.currency(code: "USD").precision(.fractionLength(0)))) listed")
+                    Text("vs \(product.price.formatted(.currency(code: "BHD").precision(.fractionLength(0)))) listed")
                         .font(.inter(11))
                         .foregroundStyle(Color.omTextMuted)
                 }
@@ -143,7 +167,7 @@ struct IncomingOffersView: View {
                     Image(systemName: "arrow.left.arrow.right.circle.fill")
                         .font(.system(size: 13))
                         .foregroundStyle(Color.stone600)
-                    Text("You countered with \(counter.formatted(.currency(code: "USD").precision(.fractionLength(0))))")
+                    Text("You countered with \(counter.formatted(.currency(code: "BHD").precision(.fractionLength(0))))")
                         .font(.inter(13, weight: .semibold))
                         .foregroundStyle(Color.stone600)
                 }
@@ -270,7 +294,7 @@ struct IncomingOffersView: View {
                 VStack(alignment: .leading, spacing: Spacing.s) {
                     Text("Your counter price".uppercased()).font(.omMicro).foregroundStyle(Color.omTextSubtle)
                     HStack {
-                        Text("$").font(.serif(28)).foregroundStyle(Color.omAccent)
+                        Text("BHD").font(.inter(14, weight: .semibold)).foregroundStyle(Color.omAccent)
                         TextField("0", text: $counterText)
                             .font(.serif(28))
                             .foregroundStyle(Color.omText)

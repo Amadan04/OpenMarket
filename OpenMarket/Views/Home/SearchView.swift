@@ -152,7 +152,7 @@ struct SearchView: View {
                 Text(product.location).font(.inter(13)).foregroundStyle(Color.omTextMuted)
             }
             Spacer()
-            Text(product.price.formatted(.currency(code: "USD").precision(.fractionLength(0))))
+            Text(product.price.formatted(.currency(code: "BHD").precision(.fractionLength(0))))
                 .font(.inter(15, weight: .bold))
                 .foregroundStyle(Color.omAccent)
         }

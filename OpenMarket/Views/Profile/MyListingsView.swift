@@ -192,7 +192,7 @@ struct MyListingsView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 6))
                 }
                 Text(product.title).font(.inter(15, weight: .semibold)).foregroundStyle(Color.omText).lineLimit(1)
-                Text(product.price.formatted(.currency(code: "USD").precision(.fractionLength(0))))
+                Text(product.price.formatted(.currency(code: "BHD").precision(.fractionLength(0))))
                     .font(.inter(15, weight: .bold)).foregroundStyle(product.isSold ? Color.omTextMuted : Color.omAccent)
             }
             Spacer()

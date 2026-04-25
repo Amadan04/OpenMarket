@@ -7,6 +7,7 @@ final class OfferViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var respondingID: Int? = nil
     @Published var errorMessage: String? = nil
+    @Published var lastAction: String? = nil
 
     func loadOffers(forListingID id: Int) async {
         isLoading = true
@@ -25,6 +26,12 @@ final class OfferViewModel: ObservableObject {
             let updated = try await OfferService.respond(offerID: offerID, action: action, counterAmount: counterAmount)
             if let idx = offers.firstIndex(where: { $0.id == offerID }) {
                 offers[idx] = updated
+            }
+            switch action {
+            case "accept":  lastAction = "Offer accepted"
+            case "decline": lastAction = "Offer declined"
+            case "counter": lastAction = "Counter offer sent"
+            default: break
             }
         } catch {
             errorMessage = "Failed to update offer."

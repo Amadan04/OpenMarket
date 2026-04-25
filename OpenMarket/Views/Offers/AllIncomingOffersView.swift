@@ -106,7 +106,7 @@ struct AllIncomingOffersView: View {
                         .font(.inter(14, weight: .semibold))
                         .foregroundStyle(Color.omText)
                         .lineLimit(1)
-                    Text(listing.price.formatted(.currency(code: "USD").precision(.fractionLength(0))))
+                    Text(listing.price.formatted(.currency(code: "BHD").precision(.fractionLength(0))))
                         .font(.inter(13, weight: .bold))
                         .foregroundStyle(Color.omAccent)
                 }
@@ -178,10 +178,10 @@ private struct OfferRowView: View {
                 Spacer()
 
                 VStack(alignment: .trailing, spacing: 2) {
-                    Text(currentOffer.amount.formatted(.currency(code: "USD").precision(.fractionLength(0))))
+                    Text(currentOffer.amount.formatted(.currency(code: "BHD").precision(.fractionLength(0))))
                         .font(.serif(20))
                         .foregroundStyle(Color.omAccent)
-                    Text("vs \(listingPrice.formatted(.currency(code: "USD").precision(.fractionLength(0))))")
+                    Text("vs \(listingPrice.formatted(.currency(code: "BHD").precision(.fractionLength(0))))")
                         .font(.inter(11))
                         .foregroundStyle(Color.omTextMuted)
                 }
@@ -203,7 +203,7 @@ private struct OfferRowView: View {
                 HStack(spacing: Spacing.s) {
                     Image(systemName: "arrow.left.arrow.right.circle.fill")
                         .font(.system(size: 13)).foregroundStyle(Color.stone600)
-                    Text("You countered with \(counter.formatted(.currency(code: "USD").precision(.fractionLength(0))))")
+                    Text("You countered with \(counter.formatted(.currency(code: "BHD").precision(.fractionLength(0))))")
                         .font(.inter(13, weight: .semibold)).foregroundStyle(Color.stone600)
                 }
             }

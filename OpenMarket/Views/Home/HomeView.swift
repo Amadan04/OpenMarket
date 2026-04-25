@@ -184,7 +184,7 @@ struct HomeView: View {
                     .font(.inter(12, weight: .semibold))
                     .foregroundStyle(Color.omText)
                     .lineLimit(1)
-                Text(product.price.formatted(.currency(code: "USD").precision(.fractionLength(0))))
+                Text(product.price.formatted(.currency(code: "BHD").precision(.fractionLength(0))))
                     .font(.inter(12, weight: .bold))
                     .foregroundStyle(Color.omAccent)
             }

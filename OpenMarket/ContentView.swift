@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
+    @ObservedObject private var appState = AppState.shared
 
     var body: some View {
         Group {
@@ -12,6 +13,12 @@ struct ContentView: View {
             }
         }
         .animation(.easeInOut(duration: 0.3), value: authViewModel.isAuthenticated)
+        .onChange(of: appState.sessionExpired) { _, expired in
+            if expired {
+                authViewModel.logout()
+                AppState.shared.sessionExpired = false
+            }
+        }
     }
 }
 

@@ -48,7 +48,9 @@ struct ChatView: View {
                     Text(otherUser.name).font(.inter(14, weight: .semibold)).foregroundStyle(Color.omText)
                     Image(systemName: "checkmark.seal.fill").font(.system(size: 12)).foregroundStyle(Color.sage500)
                 }
-                Text("● Active now").font(.inter(11, weight: .medium)).foregroundStyle(Color.sage500)
+                Text(viewModel.isConnected ? "● Connected" : "Connecting…")
+                    .font(.inter(11, weight: .medium))
+                    .foregroundStyle(viewModel.isConnected ? Color.sage500 : Color.omTextMuted)
             }
             Spacer()
             Image(systemName: "ellipsis").font(.system(size: 18)).foregroundStyle(Color.omTextMuted)
@@ -75,7 +77,7 @@ struct ChatView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(product?.title ?? "").font(.inter(13, weight: .semibold)).foregroundStyle(Color.omText).lineLimit(1)
                 if let price = product?.price {
-                    Text(price.formatted(.currency(code: "USD").precision(.fractionLength(0))))
+                    Text(price.formatted(.currency(code: "BHD").precision(.fractionLength(0))))
                         .font(.inter(13, weight: .bold)).foregroundStyle(Color.omAccent)
                 }
             }

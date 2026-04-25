@@ -67,7 +67,10 @@ final class APIClient {
         let (data, response) = try await URLSession.shared.data(for: request)
 
         if let http = response as? HTTPURLResponse {
-            if http.statusCode == 401 { throw APIError.unauthorized }
+            if http.statusCode == 401 {
+                await MainActor.run { AppState.shared.sessionExpired = true }
+                throw APIError.unauthorized
+            }
             if http.statusCode >= 400 {
                 let msg = (try? decoder.decode(ErrorResponse.self, from: data))?.error ?? "Request failed"
                 throw APIError.serverError(msg)
@@ -104,7 +107,10 @@ final class APIClient {
 
         let (data, response) = try await URLSession.shared.data(for: request)
         if let http = response as? HTTPURLResponse {
-            if http.statusCode == 401 { throw APIError.unauthorized }
+            if http.statusCode == 401 {
+                await MainActor.run { AppState.shared.sessionExpired = true }
+                throw APIError.unauthorized
+            }
             if http.statusCode >= 400 {
                 let msg = (try? decoder.decode(ErrorResponse.self, from: data))?.error ?? "Upload failed"
                 throw APIError.serverError(msg)

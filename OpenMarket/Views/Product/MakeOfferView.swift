@@ -61,7 +61,7 @@ struct MakeOfferView: View {
                                     .font(.inter(14, weight: .semibold))
                                     .foregroundStyle(Color.omText)
                                     .lineLimit(1)
-                                Text("Listed for \(product.price.formatted(.currency(code: "USD").precision(.fractionLength(0))))")
+                                Text("Listed for \(product.price.formatted(.currency(code: "BHD").precision(.fractionLength(0))))")
                                     .font(.inter(13))
                                     .foregroundStyle(Color.omTextMuted)
                             }
@@ -76,7 +76,7 @@ struct MakeOfferView: View {
                         VStack(alignment: .leading, spacing: Spacing.s) {
                             Text("Your Offer".uppercased()).font(.omMicro).foregroundStyle(Color.omTextSubtle)
                             HStack {
-                                Text("$").font(.serif(28)).foregroundStyle(Color.omAccent)
+                                Text("BHD").font(.inter(14, weight: .semibold)).foregroundStyle(Color.omAccent)
                                 TextField("0", text: $offerText)
                                     .font(.serif(28))
                                     .foregroundStyle(Color.omText)
@@ -99,7 +99,7 @@ struct MakeOfferView: View {
                                     Button {
                                         offerText = String(format: "%.0f", amt)
                                     } label: {
-                                        Text(amt.formatted(.currency(code: "USD").precision(.fractionLength(0))))
+                                        Text(amt.formatted(.currency(code: "BHD").precision(.fractionLength(0))))
                                             .font(.inter(13, weight: .semibold))
                                             .foregroundStyle(offerText == String(format: "%.0f", amt) ? .white : Color.omText)
                                             .padding(.horizontal, Spacing.m)
@@ -181,6 +181,8 @@ struct MakeOfferView: View {
             )
             onOfferSent?(offer)
             dismiss()
+        } catch let APIError.serverError(msg) {
+            withAnimation { errorMessage = msg }
         } catch {
             withAnimation { errorMessage = "Failed to send offer. Please try again." }
         }

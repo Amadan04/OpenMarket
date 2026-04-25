@@ -64,42 +64,6 @@ struct LoginView: View {
                     }
                     .padding(.top, Spacing.x3)
 
-                    // Divider
-                    HStack(spacing: Spacing.m) {
-                        Rectangle().fill(Color.omBorder).frame(height: 1)
-                        Text("OR CONTINUE WITH")
-                            .font(.omMicro)
-                            .foregroundStyle(Color.omTextSubtle)
-                            .fixedSize()
-                        Rectangle().fill(Color.omBorder).frame(height: 1)
-                    }
-                    .padding(.vertical, Spacing.x3)
-
-                    // Social buttons
-                    HStack(spacing: Spacing.m) {
-                        ForEach(["Apple", "Google"], id: \.self) { provider in
-                            ZStack(alignment: .topTrailing) {
-                                Text(provider)
-                                    .font(.inter(14, weight: .semibold))
-                                    .foregroundStyle(Color.omTextSubtle)
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 52)
-                                    .background(Color.omBgSunken)
-                                    .clipShape(RoundedRectangle(cornerRadius: 14))
-                                    .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.omBorder, lineWidth: 1))
-                                Text("Soon")
-                                    .font(.omMicro)
-                                    .foregroundStyle(.white)
-                                    .padding(.horizontal, 6)
-                                    .padding(.vertical, 3)
-                                    .background(Color.omTextSubtle)
-                                    .clipShape(Capsule())
-                                    .offset(x: -6, y: -8)
-                            }
-                        }
-                    }
-                    .allowsHitTesting(false)
-
                     // Sign up link
                     HStack(spacing: 4) {
                         Spacer()
@@ -124,7 +88,7 @@ struct LoginView: View {
     private var forgotPasswordSheet: some View {
         ZStack {
             Color.omBg.ignoresSafeArea()
-            VStack(alignment: .leading, spacing: 0) {
+            VStack(spacing: 0) {
                 HStack {
                     Spacer()
                     Button { showForgotPassword = false } label: {
@@ -139,42 +103,36 @@ struct LoginView: View {
                 }
                 .padding(.bottom, Spacing.xl)
 
-                Text("Reset password.")
-                    .font(.serif(36))
+                Spacer()
+
+                Image(systemName: "lock.rotation")
+                    .font(.system(size: 52))
+                    .foregroundStyle(Color.omAccent)
+                    .padding(.bottom, Spacing.l)
+
+                Text("Forgot your password?")
+                    .font(.serif(28))
                     .foregroundStyle(Color.omText)
-                Text("Enter your email and we'll send a reset link.")
+                    .multilineTextAlignment(.center)
+
+                Text("Please contact support or create a new account.")
                     .font(.omCallout)
                     .foregroundStyle(Color.omTextMuted)
+                    .multilineTextAlignment(.center)
                     .padding(.top, Spacing.s)
-
-                if forgotSent {
-                    HStack(spacing: Spacing.s) {
-                        Image(systemName: "checkmark.circle.fill").foregroundStyle(Color.omOk)
-                        Text("If an account exists, you'll receive a reset email.")
-                            .font(.inter(14))
-                            .foregroundStyle(Color.omText)
-                    }
-                    .padding(Spacing.m)
-                    .background(Color.omOk.opacity(0.1))
-                    .clipShape(RoundedRectangle(cornerRadius: Radius.md))
-                    .padding(.top, Spacing.x3)
-                } else {
-                    OMField(label: "Email", text: $forgotEmail, placeholder: "you@example.com")
-                        .keyboardType(.emailAddress)
-                        .autocorrectionDisabled()
-                        .textInputAutocapitalization(.never)
-                        .padding(.top, Spacing.x3)
-
-                    OMButton(label: "Send reset link", size: .lg, fullWidth: true) {
-                        forgotSent = true
-                    }
-                    .padding(.top, Spacing.x3)
-                }
+                    .padding(.horizontal, Spacing.xl)
 
                 Spacer()
+
+                OMButton(label: "Close", variant: .secondary, size: .lg, fullWidth: true) {
+                    showForgotPassword = false
+                }
+                .padding(.horizontal, Spacing.xxl)
+                .padding(.bottom, Spacing.x4)
             }
             .padding(.horizontal, Spacing.xxl)
             .padding(.top, Spacing.l)
         }
+        .presentationDetents([.medium])
     }
 }

@@ -68,7 +68,7 @@ struct RateSellerView: View {
                                     Text("Recently").font(.inter(12)).foregroundStyle(Color.omTextMuted)
                                 }
                                 Spacer()
-                                Text(p.price.formatted(.currency(code: "USD").precision(.fractionLength(0))))
+                                Text(p.price.formatted(.currency(code: "BHD").precision(.fractionLength(0))))
                                     .font(.inter(14, weight: .bold)).foregroundStyle(Color.omAccent)
                             }
                             .padding(Spacing.m)

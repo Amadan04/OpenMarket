@@ -55,7 +55,7 @@ struct MapView: View {
                                     HStack(spacing: 4) {
                                         Text(categoryEmoji(product.category))
                                             .font(.system(size: 12))
-                                        Text(product.price.formatted(.currency(code: "USD").precision(.fractionLength(0))))
+                                        Text(product.price.formatted(.currency(code: "BHD").precision(.fractionLength(0))))
                                             .font(.inter(12, weight: .bold))
                                             .foregroundStyle(isSelected ? .white : Color.omText)
                                     }
@@ -185,7 +185,7 @@ struct MapView: View {
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(product.title).font(.inter(14, weight: .semibold)).foregroundStyle(Color.omText).lineLimit(1)
-                    Text(product.price.formatted(.currency(code: "USD").precision(.fractionLength(0))))
+                    Text(product.price.formatted(.currency(code: "BHD").precision(.fractionLength(0))))
                         .font(.inter(16, weight: .bold)).foregroundStyle(Color.omAccent)
                     HStack(spacing: 3) {
                         Image(systemName: "mappin").font(.system(size: 10)).foregroundStyle(Color.omTextSubtle)
