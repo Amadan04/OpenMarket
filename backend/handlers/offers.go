@@ -168,6 +168,10 @@ func RespondToOffer(db *gorm.DB) gin.HandlerFunc {
 		switch body.Action {
 		case "accept":
 			offer.Status = models.OfferStatusAccepted
+			db.Model(&models.Listing{}).Where("id = ?", offer.ListingID).Updates(map[string]interface{}{
+				"is_sold":  true,
+				"buyer_id": offer.BuyerID,
+			})
 		case "decline":
 			offer.Status = models.OfferStatusDeclined
 		case "counter":
@@ -195,6 +199,66 @@ func RespondToOffer(db *gorm.DB) gin.HandlerFunc {
 		case models.OfferStatusCountered:
 			sendAPNSToUser(db, offer.BuyerID, "Counter offer received",
 				fmt.Sprintf("The seller countered with %s", formatPrice(*offer.CounterAmount)))
+		}
+		c.JSON(http.StatusOK, offer)
+	}
+}
+
+func BuyerRespondToOffer(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userID := c.GetUint("user_id")
+		offerID, err := strconv.Atoi(c.Param("id"))
+		if err != nil || offerID <= 0 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid offer id"})
+			return
+		}
+
+		var body struct {
+			Action string `json:"action"`
+		}
+		if err := c.ShouldBindJSON(&body); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+			return
+		}
+
+		var offer models.Offer
+		if err := db.First(&offer, offerID).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Offer not found"})
+			return
+		}
+		if offer.BuyerID != userID {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Unauthorized"})
+			return
+		}
+		if offer.Status != models.OfferStatusCountered {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Offer is not in countered state"})
+			return
+		}
+
+		switch body.Action {
+		case "accept":
+			offer.Status = models.OfferStatusAccepted
+			if offer.CounterAmount != nil {
+				offer.Amount = *offer.CounterAmount
+			}
+			db.Model(&models.Listing{}).Where("id = ?", offer.ListingID).Updates(map[string]interface{}{
+				"is_sold":  true,
+				"buyer_id": offer.BuyerID,
+			})
+		case "decline":
+			offer.Status = models.OfferStatusDeclined
+		default:
+			c.JSON(http.StatusBadRequest, gin.H{"error": "action must be accept or decline"})
+			return
+		}
+
+		if err := db.Save(&offer).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update offer"})
+			return
+		}
+
+		if offer.Status == models.OfferStatusAccepted {
+			sendAPNSToUser(db, offer.SellerID, "Counter accepted", "The buyer accepted your counter offer.")
 		}
 		c.JSON(http.StatusOK, offer)
 	}

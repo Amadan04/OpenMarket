@@ -26,7 +26,7 @@ struct ProductDetailView: View {
                 VStack(alignment: .leading, spacing: 0) {
                         // Condition + age
                         HStack {
-                            Text("LIKE NEW · \(viewModel.product.category.uppercased())")
+                            Text("\(viewModel.product.condition.uppercased()) · \(viewModel.product.category.uppercased())")
                                 .font(.omMicro)
                                 .foregroundStyle(Color.sage500)
                             Spacer()
@@ -112,12 +112,13 @@ struct ProductDetailView: View {
             RecentlyViewedStore.shared.record(viewModel.product)
             async let reviews: () = viewModel.loadReviews()
             async let offer: () = viewModel.loadMyOffer()
-            _ = await (reviews, offer)
+            async let seller: () = viewModel.loadSellerInfo()
+            _ = await (reviews, offer, seller)
         }
         .sheet(isPresented: $showChat) {
             if authViewModel.currentUser != nil {
                 let vm = ChatViewModel()
-                let other = User(id: viewModel.product.userID, name: "Seller", email: "", createdAt: Date())
+                let other = User(id: viewModel.product.userID, name: viewModel.sellerName, email: "", createdAt: Date())
                 ChatView(viewModel: vm, otherUser: other)
                     .task { await vm.openChat(with: viewModel.product.userID) }
             }
@@ -134,7 +135,7 @@ struct ProductDetailView: View {
             ImageGalleryView(images: viewModel.product.images, currentIndex: $imageIndex)
         }
         .sheet(isPresented: $showRateSeller) {
-            RateSellerView(sellerID: viewModel.product.userID, sellerName: "Seller", product: viewModel.product)
+            RateSellerView(sellerID: viewModel.product.userID, sellerName: viewModel.sellerName, product: viewModel.product)
         }
         .navigationDestination(isPresented: $showSellerProfile) {
             SellerProfileView(sellerID: viewModel.product.userID)
@@ -227,10 +228,10 @@ struct ProductDetailView: View {
     private var sellerCard: some View {
         Button { showSellerProfile = true } label: {
             HStack(spacing: Spacing.m) {
-                AvatarView(initial: "S", size: 48, tone: .sage)
+                AvatarView(initial: viewModel.sellerName.prefix(1).description, size: 48, tone: .sage)
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 6) {
-                        Text("Seller").font(.inter(15, weight: .semibold)).foregroundStyle(Color.omText)
+                        Text(viewModel.sellerName).font(.inter(15, weight: .semibold)).foregroundStyle(Color.omText)
                         Image(systemName: "checkmark.seal.fill").font(.system(size: 14)).foregroundStyle(Color.sage500)
                     }
                     HStack(spacing: 4) {
@@ -396,6 +397,29 @@ struct ProductDetailView: View {
                     }
                 }
                 .buttonStyle(.plain)
+            } else if offer.status == .countered {
+                HStack(spacing: Spacing.s) {
+                    Button {
+                        Task { await viewModel.declineCounter() }
+                    } label: {
+                        Text("Decline")
+                            .font(.inter(12, weight: .semibold))
+                            .foregroundStyle(Color.omError)
+                    }
+                    .buttonStyle(.plain)
+                    Button {
+                        Task { await viewModel.acceptCounter() }
+                    } label: {
+                        Text("Accept")
+                            .font(.inter(12, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, Spacing.m)
+                            .padding(.vertical, 5)
+                            .background(Color.omOk)
+                            .clipShape(Capsule())
+                    }
+                    .buttonStyle(.plain)
+                }
             }
         }
         .padding(.horizontal, Spacing.m)

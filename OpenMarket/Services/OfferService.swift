@@ -25,6 +25,15 @@ struct OfferService {
         )
     }
 
+    static func buyerRespond(offerID: Int, action: String) async throws -> Offer {
+        struct Body: Encodable { let action: String }
+        return try await APIClient.shared.request(
+            "\(Constants.Endpoints.offers)/\(offerID)/buyer",
+            method: "PATCH",
+            body: Body(action: action)
+        )
+    }
+
     static func withdraw(offerID: Int) async throws {
         try await APIClient.shared.requestVoid(
             "\(Constants.Endpoints.offers)/\(offerID)",

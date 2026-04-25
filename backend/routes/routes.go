@@ -56,6 +56,7 @@ func Setup(r *gin.Engine, db *gorm.DB, h *hub.Hub) {
 
 		api.POST("/reports", handlers.CreateReport(db))
 
+		api.GET("/users/:id", handlers.GetUser(db))
 		api.POST("/users/:id/block", handlers.BlockUser(db))
 		api.DELETE("/users/:id/block", handlers.UnblockUser(db))
 		api.GET("/blocks", handlers.GetBlockedUsers(db))
@@ -67,6 +68,7 @@ func Setup(r *gin.Engine, db *gorm.DB, h *hub.Hub) {
 		api.GET("/offers/my", handlers.GetMyOffers(db))
 		api.GET("/products/:id/offers", handlers.GetListingOffers(db))
 		api.PATCH("/offers/:id", handlers.RespondToOffer(db))
+		api.PATCH("/offers/:id/buyer", handlers.BuyerRespondToOffer(db))
 		api.DELETE("/offers/:id", handlers.WithdrawOffer(db))
 
 		api.POST("/messages", handlers.SendMessage(db, h))

@@ -11,6 +11,7 @@ final class ProductDetailViewModel: ObservableObject {
 
     @Published var myOffer: Offer? = nil
     @Published var isWithdrawingOffer = false
+    @Published var sellerName: String = "Seller"
 
     init(product: Product) {
         self.product = product
@@ -40,6 +41,35 @@ final class ProductDetailViewModel: ObservableObject {
             myOffer = nil
         } catch {
             errorMessage = "Failed to withdraw offer."
+        }
+    }
+
+    func loadSellerInfo() async {
+        struct SellerInfo: Decodable { let name: String }
+        do {
+            let info: SellerInfo = try await APIClient.shared.request("/users/\(product.userID)")
+            sellerName = info.name
+        } catch {}
+    }
+
+    func acceptCounter() async {
+        guard let offer = myOffer else { return }
+        do {
+            let updated = try await OfferService.buyerRespond(offerID: offer.id, action: "accept")
+            myOffer = updated
+            product.isSold = true
+        } catch {
+            errorMessage = "Failed to accept counter offer."
+        }
+    }
+
+    func declineCounter() async {
+        guard let offer = myOffer else { return }
+        do {
+            let updated = try await OfferService.buyerRespond(offerID: offer.id, action: "decline")
+            myOffer = updated
+        } catch {
+            errorMessage = "Failed to decline counter offer."
         }
     }
 

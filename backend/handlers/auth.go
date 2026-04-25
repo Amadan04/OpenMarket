@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
 
 	"openmarket/models"
@@ -137,6 +138,26 @@ func Me(db *gorm.DB) gin.HandlerFunc {
 			"id":         user.ID,
 			"name":       user.Name,
 			"email":      user.Email,
+			"created_at": user.CreatedAt,
+		})
+	}
+}
+
+func GetUser(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id, err := strconv.Atoi(c.Param("id"))
+		if err != nil || id <= 0 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user id"})
+			return
+		}
+		var user models.User
+		if err := db.Select("id, name, created_at").First(&user, id).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"id":         user.ID,
+			"name":       user.Name,
 			"created_at": user.CreatedAt,
 		})
 	}
