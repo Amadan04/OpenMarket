@@ -52,7 +52,7 @@ struct FilterSheetView: View {
                         // Price
                         filterSection("Price") {
                             HStack(spacing: Spacing.m) {
-                                OMField(label: "Min", text: $minPriceText, placeholder: "$0")
+                                OMField(label: "Min", text: $minPriceText, placeholder: "BD 0")
                                     .keyboardType(.decimalPad)
                                 OMField(label: "Max", text: $maxPriceText, placeholder: "Any")
                                     .keyboardType(.decimalPad)

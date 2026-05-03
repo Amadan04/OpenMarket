@@ -102,7 +102,7 @@ struct EditListingView: View {
                         }
 
                         // Price
-                        OMField(label: "Price (USD)", text: $price, placeholder: "0", leadingIcon: "dollarsign.circle")
+                        OMField(label: "Price (BHD)", text: $price, placeholder: "0", leadingIcon: "dollarsign.circle")
                             .keyboardType(.decimalPad)
 
                         // Category
