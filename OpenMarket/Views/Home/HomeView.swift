@@ -264,6 +264,7 @@ struct HomeView: View {
 private struct MasonryGrid: View {
     let products: [Product]
     @State private var appeared = false
+    @ObservedObject private var favStore = FavoritesStore.shared
 
     private let columns = [
         GridItem(.flexible(), spacing: Spacing.m),
@@ -276,7 +277,11 @@ private struct MasonryGrid: View {
                 NavigationLink {
                     ProductDetailView(product: product)
                 } label: {
-                    ProductCardView(product: product)
+                    ProductCardView(
+                        product: product,
+                        isFavorited: favStore.isFavorited(product.id),
+                        onFavorite: { favStore.toggle(product.id) }
+                    )
                 }
                 .buttonStyle(PressScaleButtonStyle())
                 .opacity(appeared ? 1 : 0)

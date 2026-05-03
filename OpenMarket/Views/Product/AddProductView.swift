@@ -273,13 +273,6 @@ struct AddProductView: View {
                             .multilineTextAlignment(.center)
                             .frame(maxWidth: 200)
                     }
-                    // Price hint
-                    Text("📈 Similar items sell for $50–$500")
-                        .font(.inter(12, weight: .semibold))
-                        .foregroundStyle(Color.sage700)
-                        .padding(.horizontal, Spacing.m).padding(.vertical, 6)
-                        .background(Color.sage100)
-                        .clipShape(Capsule())
                 }
                 .frame(maxWidth: .infinity)
                 .padding(Spacing.xl)
@@ -325,7 +318,7 @@ struct AddProductView: View {
 
                 Group {
                     reviewRow(icon: "tag", label: "Title", value: viewModel.title.isEmpty ? "—" : viewModel.title)
-                    reviewRow(icon: "dollarsign.circle", label: "Price", value: viewModel.price.isEmpty ? "—" : "$\(viewModel.price)")
+                    reviewRow(icon: "dollarsign.circle", label: "Price", value: viewModel.price.isEmpty ? "—" : "BHD \(viewModel.price)")
                     reviewRow(icon: "folder", label: "Category", value: viewModel.category)
                     reviewRow(icon: "mappin", label: "Location", value: viewModel.location.isEmpty ? "—" : viewModel.location)
                 }
